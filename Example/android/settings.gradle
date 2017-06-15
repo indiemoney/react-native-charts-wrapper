@@ -1,5 +1,5 @@
 rootProject.name = 'Example'
-include ':react-native-charts-wrapper'
-project(':react-native-charts-wrapper').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-charts-wrapper/android')
+include ':react-native-indie-charts-wrapper'
+project(':react-native-indie-charts-wrapper').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-indie-charts-wrapper/android')
 
 include ':app'

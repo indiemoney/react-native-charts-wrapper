@@ -9,7 +9,7 @@
   "dependencies": {
     "react": "16.0.0-alpha.6",
     "react-native": "0.43.4",
-    "react-native-charts-wrapper": "file:../",
+    "react-native-indie-charts-wrapper": "file:../",
     "lodash": "^4.12.0",
     "immutability-helper": "2.2.0"
   },

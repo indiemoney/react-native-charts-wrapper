@@ -9,7 +9,7 @@ import {
 import update from 'immutability-helper';
 
 import _ from 'lodash';
-import {ScatterChart} from 'react-native-charts-wrapper';
+import {ScatterChart} from 'react-native-indie-charts-wrapper';
 
 class ScatterChartScreen extends React.Component {
 

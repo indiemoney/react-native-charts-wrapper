@@ -8,7 +8,7 @@ import {
 } from 'react-native';
 import update from 'immutability-helper';
 
-import {RadarChart} from 'react-native-charts-wrapper';
+import {RadarChart} from 'react-native-indie-charts-wrapper';
 
 
 class RadarChartScreen extends React.Component {

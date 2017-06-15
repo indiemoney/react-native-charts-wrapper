@@ -9,7 +9,7 @@ import {
 import update from 'immutability-helper';
 
 import _ from 'lodash';
-import {LineChart} from 'react-native-charts-wrapper';
+import {LineChart} from 'react-native-indie-charts-wrapper';
 
 const COLOR_PURPLE = processColor('#697dfb');
 

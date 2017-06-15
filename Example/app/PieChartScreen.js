@@ -7,7 +7,7 @@ import {
   processColor
 } from 'react-native';
 
-import {PieChart} from 'react-native-charts-wrapper';
+import {PieChart} from 'react-native-indie-charts-wrapper';
 
 class PieChartScreen extends React.Component {
 

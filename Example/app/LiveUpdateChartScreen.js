@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import {StyleSheet, processColor} from 'react-native';
 
-import {LineChart} from 'react-native-charts-wrapper';
+import {LineChart} from 'react-native-indie-charts-wrapper';
 
 const colors = [processColor('red'), processColor('blue'), processColor('green'), processColor('yellow'), processColor('purple'), processColor('pink')];
 

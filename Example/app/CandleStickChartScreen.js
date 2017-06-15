@@ -9,7 +9,7 @@ import {
 import update from 'immutability-helper';
 
 import _ from 'lodash';
-import {CandleStickChart} from 'react-native-charts-wrapper';
+import {CandleStickChart} from 'react-native-indie-charts-wrapper';
 
 class CandleStickChartScreen extends React.Component {
 

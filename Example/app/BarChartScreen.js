@@ -7,7 +7,7 @@ import {
   processColor
 } from 'react-native';
 
-import {BarChart} from 'react-native-charts-wrapper';
+import {BarChart} from 'react-native-indie-charts-wrapper';
 
 class BarChartScreen extends React.Component {
 

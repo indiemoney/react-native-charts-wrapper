@@ -9,7 +9,7 @@ import {
 import update from 'immutability-helper';
 
 import _ from 'lodash';
-import {BubbleChart} from 'react-native-charts-wrapper';
+import {BubbleChart} from 'react-native-indie-charts-wrapper';
 
 class BubbleChartScreen extends React.Component {
 

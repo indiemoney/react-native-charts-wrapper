@@ -5,7 +5,7 @@
 import React, {Component} from 'react';
 import {View, Text, StyleSheet, processColor} from 'react-native';
 
-import {CombinedChart} from 'react-native-charts-wrapper';
+import {CombinedChart} from 'react-native-indie-charts-wrapper';
 
 const styles = StyleSheet.create({
   container: {

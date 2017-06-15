@@ -7,7 +7,7 @@ import {
   processColor
 } from 'react-native';
 
-import {HorizontalBarChart} from 'react-native-charts-wrapper';
+import {HorizontalBarChart} from 'react-native-indie-charts-wrapper';
 
 class HorizontalBarChartScreen extends React.Component {
 

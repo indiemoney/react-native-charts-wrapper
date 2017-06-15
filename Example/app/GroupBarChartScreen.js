@@ -6,7 +6,7 @@ import {
   View, processColor
 } from 'react-native';
 
-import {BarChart} from 'react-native-charts-wrapper';
+import {BarChart} from 'react-native-indie-charts-wrapper';
 
 class StackedBarChartScreen extends React.Component {
 

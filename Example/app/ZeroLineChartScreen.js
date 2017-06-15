@@ -7,7 +7,7 @@ import {
   processColor
 } from 'react-native';
 
-import {BarChart} from 'react-native-charts-wrapper';
+import {BarChart} from 'react-native-indie-charts-wrapper';
 
 const GREEN = processColor('#71BD6A');
 const RED = processColor('#D14B5A');

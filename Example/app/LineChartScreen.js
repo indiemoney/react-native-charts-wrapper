@@ -7,7 +7,7 @@ import {
 } from 'react-native';
 import update from 'immutability-helper';
 
-import {LineChart} from 'react-native-charts-wrapper';
+import {LineChart} from 'react-native-indie-charts-wrapper';
 
 class LineChartScreen extends React.Component {
 
