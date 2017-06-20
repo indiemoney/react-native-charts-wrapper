@@ -2,6 +2,7 @@ package com.github.wuxudong.rncharts.charts;
 
 import android.content.res.ColorStateList;
 import android.os.Build;
+import android.util.Log;
 
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
@@ -27,6 +28,7 @@ import com.github.wuxudong.rncharts.data.DataExtract;
 import com.github.wuxudong.rncharts.listener.RNOnChartValueSelectedListener;
 import com.github.wuxudong.rncharts.markers.RNRectangleMarkerView;
 import com.github.wuxudong.rncharts.utils.BridgeUtils;
+import com.github.mikephil.charting.charts.BarLineChartBase;
 
 public abstract class ChartBaseManager<T extends Chart, U extends Entry> extends SimpleViewManager {
 
@@ -378,8 +380,12 @@ public abstract class ChartBaseManager<T extends Chart, U extends Entry> extends
      */
     @ReactProp(name = "data")
     public void setData(Chart chart, ReadableMap propMap) {
+        Log.d(chart.toString(), "setData!");
         chart.setData(getDataExtract().extract(propMap));
-        chart.invalidate();
+        chart.notifyDataSetChanged();
+        // ((BarLineChartBase) chart).setVisibleXRangeMaximum(60);
+        // ((BarLineChartBase) chart).moveViewToX(0);
+        //chart.invalidate();
     }
 
 

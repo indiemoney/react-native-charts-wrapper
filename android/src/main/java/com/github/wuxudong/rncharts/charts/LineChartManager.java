@@ -1,5 +1,6 @@
 package com.github.wuxudong.rncharts.charts;
 
+import android.util.Log;
 
 import com.facebook.react.uimanager.ThemedReactContext;
 import com.github.mikephil.charting.charts.LineChart;
@@ -18,6 +19,7 @@ public class LineChartManager extends BarLineChartBaseManager<LineChart, Entry> 
     @Override
     protected LineChart createViewInstance(ThemedReactContext reactContext) {
         LineChart lineChart =  new LineChart(reactContext);
+        Log.d(lineChart.toString(), "createViewInstance");
         lineChart.setOnChartValueSelectedListener(new RNOnChartValueSelectedListener(lineChart));
         return lineChart;
     }

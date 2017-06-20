@@ -1,5 +1,7 @@
 package com.github.wuxudong.rncharts.charts;
 
+import android.util.Log;
+
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.ReadableType;
 import com.facebook.react.uimanager.annotations.ReactProp;
@@ -54,6 +56,7 @@ public abstract class BarLineChartBaseManager<T extends BarLineChartBase, U exte
 
     @ReactProp(name = "maxVisibleValueCount")
     public void setMaxVisibleValueCount(BarLineChartBase chart, int count) {
+        Log.d(chart.toString(), "maxVisibleValueCount " + count);
         chart.setMaxVisibleValueCount(count);
     }
 
@@ -110,6 +113,8 @@ public abstract class BarLineChartBaseManager<T extends BarLineChartBase, U exte
                 axisDependency = YAxis.AxisDependency.RIGHT;
             }
 
+            Log.d(chart.toString(), "setZoom " + (float) propMap.getDouble("scaleX") + ", " + (float) propMap.getDouble("scaleY"));
+
             chart.zoom(
                     (float) propMap.getDouble("scaleX"),
                     (float) propMap.getDouble("scaleY"),
@@ -117,6 +122,7 @@ public abstract class BarLineChartBaseManager<T extends BarLineChartBase, U exte
                     (float) propMap.getDouble("yValue"),
                     axisDependency
             );
+            chart.invalidate();
         }
     }
 
@@ -139,4 +145,17 @@ public abstract class BarLineChartBaseManager<T extends BarLineChartBase, U exte
         }
         ((BarLineChartBase) chart).setViewPortOffsets(left, top, right, bottom);
     }
+
+    @ReactProp(name = "visibleXRangeMaximum")
+    public void setVisibleXRangeMaximum(BarLineChartBase chart, int count) {
+        if (chart.getData() != null && chart.getData().getDataSetByIndex(0) != null) {
+            //Log.d(chart.toString(), "data count " + chart.getData().getDataSetByIndex(0).getEntryCount());
+            //chart.getData().notifyDataChanged();
+        }
+        Log.d(chart.toString(), "setVisibleXRangeMaximum " + count);
+        //chart.notifyDataSetChanged();
+        //chart.setVisibleXRangeMaximum(count);
+        chart.moveViewToX(0);
+    }
+
 }
