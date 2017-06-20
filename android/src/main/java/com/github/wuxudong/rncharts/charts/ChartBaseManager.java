@@ -2,7 +2,6 @@ package com.github.wuxudong.rncharts.charts;
 
 import android.content.res.ColorStateList;
 import android.os.Build;
-import android.util.Log;
 
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
@@ -380,12 +379,8 @@ public abstract class ChartBaseManager<T extends Chart, U extends Entry> extends
      */
     @ReactProp(name = "data")
     public void setData(Chart chart, ReadableMap propMap) {
-        Log.d(chart.toString(), "setData!");
         chart.setData(getDataExtract().extract(propMap));
-        chart.notifyDataSetChanged();
-        // ((BarLineChartBase) chart).setVisibleXRangeMaximum(60);
-        // ((BarLineChartBase) chart).moveViewToX(0);
-        //chart.invalidate();
+        chart.invalidate();
     }
 
 
