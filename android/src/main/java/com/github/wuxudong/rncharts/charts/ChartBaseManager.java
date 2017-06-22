@@ -382,5 +382,15 @@ public abstract class ChartBaseManager<T extends Chart, U extends Entry> extends
         chart.invalidate();
     }
 
-
+    /**
+     * details: https://github.com/PhilJay/MPAndroidChart/wiki/Highlighting
+     */
+    @ReactProp(name = "highlightValue")
+    public void setHighlightValue(Chart chart, ReadableMap propMap) {
+        chart.highlightValue(
+            (float) propMap.getDouble("x"),
+            propMap.getInt("dataSetIndex"),
+            propMap.getBoolean("callListener")
+        );
+    }
 }
