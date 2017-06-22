@@ -389,8 +389,8 @@ public abstract class ChartBaseManager<T extends Chart, U extends Entry> extends
     public void setHighlightValue(Chart chart, ReadableMap propMap) {
         chart.highlightValue(
             (float) propMap.getDouble("x"),
-            (int) propMap.getInt("dataSetIndex"),
-            (boolean) propMap.getBoolean("callListener")
+            propMap.getInt("dataSetIndex"),
+            propMap.getBoolean("callListener")
         );
     }
 }
