@@ -28,9 +28,13 @@ public class ChartDataSetConfigUtils {
         }
 
         // TODO more config to add: https://github.com/PhilJay/MPAndroidChart/wiki/The-DataSet-class
-
+        
         if (BridgeUtils.validate(config, ReadableType.Boolean, "drawValues")) {
             dataSet.setDrawValues(config.getBoolean("drawValues"));
+        }
+        
+        if (BridgeUtils.validate(config, ReadableType.Boolean, "drawIcons")) {
+            dataSet.setDrawIcons(config.getBoolean("drawIcons"));
         }
 
         if (BridgeUtils.validate(config, ReadableType.Boolean, "highlightEnabled")) {
