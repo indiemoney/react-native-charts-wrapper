@@ -3,6 +3,7 @@ package com.github.wuxudong.rncharts.data;
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.ReadableType;
+import com.facebook.react.uimanager.ThemedReactContext;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
@@ -18,6 +19,12 @@ import java.util.ArrayList;
  */
 
 public class LineDataExtract extends DataExtract<LineData, Entry> {
+    private ThemedReactContext mContext;
+
+    public LineDataExtract(ThemedReactContext context) {
+        mContext = context
+    }
+
     @Override
     LineData createData() {
         return new LineData();
@@ -93,7 +100,9 @@ public class LineDataExtract extends DataExtract<LineData, Entry> {
             if (map.hasKey("x")) {
                 x = (float) map.getDouble("x");
             }
-            entry = new Entry(x, (float) map.getDouble("y"), ConversionUtil.toMap(map));
+            String iconName = map.getString("icon");
+            Drawable drawable = mContext.getResources().getIdentifier(iconName, "drawable", mContext.getPackageName());
+            entry = new Entry(x, (float) map.getDouble("y"), drawable, ConversionUtil.toMap(map));
         } else if (ReadableType.Number.equals(values.getType(index))) {
             entry = new Entry(x, (float) values.getDouble(index));
         } else {
