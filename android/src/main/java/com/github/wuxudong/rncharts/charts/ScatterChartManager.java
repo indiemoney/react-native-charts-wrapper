@@ -23,6 +23,8 @@ import java.util.ArrayList;
 
 public class ScatterChartManager extends BarLineChartBaseManager<ScatterChart, Entry> {
 
+    private ThemedReactContext mContext;
+
     @Override
     public String getName() {
         return "RNScatterChart";
@@ -30,6 +32,8 @@ public class ScatterChartManager extends BarLineChartBaseManager<ScatterChart, E
 
     @Override
     protected ScatterChart createViewInstance(ThemedReactContext reactContext) {
+        mContext = reactContext;
+
         ScatterChart scatterChart = new ScatterChart(reactContext);
         scatterChart.setOnChartValueSelectedListener(new RNOnChartValueSelectedListener(scatterChart));
         scatterChart.setOnChartGestureListener(new RNOnChartGestureListener(scatterChart));
@@ -39,6 +43,6 @@ public class ScatterChartManager extends BarLineChartBaseManager<ScatterChart, E
 
     @Override
     DataExtract getDataExtract() {
-        return new ScatterDataExtract();
+        return new ScatterDataExtract(mContext);
     }
 }

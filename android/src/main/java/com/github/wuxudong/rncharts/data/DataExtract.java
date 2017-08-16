@@ -3,11 +3,22 @@ package com.github.wuxudong.rncharts.data;
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.ReadableType;
+import com.facebook.react.uimanager.ThemedReactContext;
 import com.github.mikephil.charting.data.ChartData;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.interfaces.datasets.IDataSet;
 import com.github.wuxudong.rncharts.utils.BridgeUtils;
 
+import android.graphics.Color;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffColorFilter;
+
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.util.Log;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 
 /**
@@ -72,5 +83,37 @@ public abstract class DataExtract<D extends ChartData, U extends Entry> {
     abstract U createEntry(ReadableArray values, int index);
 
 
+    protected Drawable getIconDrawable(ThemedReactContext context, ReadableMap map) {
+        if (!map.hasKey("icon")) {
+            return null;
+        }
 
+        String iconName = map.getString("icon");
+
+        Drawable drawable = null;
+        InputStream is = null;
+        Bitmap b = null;
+        Bitmap sb = null;
+        if (context != null && iconName != null) {
+            try {
+                int color = map.hasKey("iconColor") ? map.getInt("iconColor") : Color.WHITE;
+                int size = map.hasKey("iconSize") ? map.getInt("iconSize") : 100;
+                is = context.getAssets().open(iconName);
+                BitmapDrawable bd = new BitmapDrawable(context.getResources(), is);
+                b = bd.getBitmap();
+                sb = Bitmap.createScaledBitmap(b, size, size, false);
+                bd = new BitmapDrawable(context.getResources(), sb);
+                drawable = (Drawable) bd;
+                drawable.setColorFilter(new PorterDuffColorFilter(color, PorterDuff.Mode.SRC_ATOP));
+            } catch (IOException e) {
+                Log.e("wuxudong/react-native-charts-wrapper", "Error creating icon drawable", e);
+            } finally {
+                if (is != null) {
+                    try { is.close(); }
+                    catch (IOException e) { Log.e("wuxudong/react-native-charts-wrapper", "Error closing stream", e); } }
+                if (b != null) { b.recycle(); }
+            }
+        }
+        return drawable;
+    }
 }

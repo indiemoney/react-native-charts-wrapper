@@ -3,6 +3,7 @@ package com.github.wuxudong.rncharts.data;
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.ReadableType;
+import com.facebook.react.uimanager.ThemedReactContext;
 import com.github.mikephil.charting.charts.ScatterChart;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.ScatterData;
@@ -12,6 +13,7 @@ import com.github.wuxudong.rncharts.utils.BridgeUtils;
 import com.github.wuxudong.rncharts.utils.ChartDataSetConfigUtils;
 import com.github.wuxudong.rncharts.utils.ConversionUtil;
 
+import android.graphics.drawable.Drawable;
 import java.util.ArrayList;
 
 /**
@@ -19,6 +21,15 @@ import java.util.ArrayList;
  */
 
 public class ScatterDataExtract extends DataExtract<ScatterData, Entry> {
+    private ThemedReactContext mContext;
+
+    public ScatterDataExtract() { }
+
+    public ScatterDataExtract(ThemedReactContext context) {
+        super();
+        mContext = context;
+    }
+
     @Override
     ScatterData createData() {
         return new ScatterData();
@@ -62,7 +73,9 @@ public class ScatterDataExtract extends DataExtract<ScatterData, Entry> {
             if (map.hasKey("x")) {
                 x = (float) map.getDouble("x");
             }
-            entry = new Entry(x, (float) map.getDouble("y"), ConversionUtil.toMap(map));
+
+            Drawable drawable = getIconDrawable(mContext, map);
+            entry = new Entry(x, (float) map.getDouble("y"), drawable, ConversionUtil.toMap(map));
         } else if (ReadableType.Number.equals(values.getType(index))) {
             entry = new Entry(x, (float) values.getDouble(index));
         } else {

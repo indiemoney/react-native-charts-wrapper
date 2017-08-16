@@ -1,6 +1,5 @@
 package com.github.wuxudong.rncharts.data;
 
-import android.graphics.drawable.Drawable;
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.ReadableType;
@@ -13,8 +12,7 @@ import com.github.wuxudong.rncharts.utils.BridgeUtils;
 import com.github.wuxudong.rncharts.utils.ChartDataSetConfigUtils;
 import com.github.wuxudong.rncharts.utils.ConversionUtil;
 
-import java.io.IOException;
-import java.io.InputStream;
+import android.graphics.drawable.Drawable;
 import java.util.ArrayList;
 
 /**
@@ -25,7 +23,7 @@ public class LineDataExtract extends DataExtract<LineData, Entry> {
     private ThemedReactContext mContext;
 
     public LineDataExtract() { }
-    
+
     public LineDataExtract(ThemedReactContext context) {
         super();
         mContext = context;
@@ -106,27 +104,8 @@ public class LineDataExtract extends DataExtract<LineData, Entry> {
             if (map.hasKey("x")) {
                 x = (float) map.getDouble("x");
             }
-            String iconName = null;
 
-            if (map.hasKey("icon")) {
-                iconName = map.getString("icon");
-            }
-            
-            Drawable drawable = null;
-            InputStream is = null;
-            if (mContext != null && iconName != null) {
-                try {
-                    is = mContext.getAssets().open(iconName);
-                    drawable = Drawable.createFromStream(is, null);
-                    drawable.setBounds(0, 0, 500, 500);
-                } catch (IOException e) {
-                    
-                } finally {
-                    if (is != null) {
-                        try { is.close(); } catch (IOException e) { }
-                    }
-                }
-            }
+            Drawable drawable = getIconDrawable(mContext, map);
             entry = new Entry(x, (float) map.getDouble("y"), drawable, ConversionUtil.toMap(map));
         } else if (ReadableType.Number.equals(values.getType(index))) {
             entry = new Entry(x, (float) values.getDouble(index));

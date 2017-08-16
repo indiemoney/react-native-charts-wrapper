@@ -3,6 +3,7 @@ package com.github.wuxudong.rncharts.data;
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.ReadableType;
+import com.facebook.react.uimanager.ThemedReactContext;
 import com.github.mikephil.charting.data.ChartData;
 import com.github.mikephil.charting.data.CombinedData;
 import com.github.mikephil.charting.data.Entry;
@@ -17,11 +18,19 @@ import java.util.ArrayList;
  */
 
 public class CombinedDataExtract extends DataExtract<CombinedData, Entry> {
-    private LineDataExtract lineDataExtract = new LineDataExtract();
+    private LineDataExtract lineDataExtract;
     private BarDataExtract barDataExtract = new BarDataExtract();
-    private ScatterDataExtract scatterDataExtract = new ScatterDataExtract();
+    private ScatterDataExtract scatterDataExtract;
     private CandleDataExtract candleDataExtract = new CandleDataExtract();
     private BubbleDataExtract bubbleDataExtract = new BubbleDataExtract();
+
+    public CombinedDataExtract() { }
+
+    public CombinedDataExtract(ThemedReactContext context) {
+        super();
+        lineDataExtract = new LineDataExtract(context);
+        scatterDataExtract = new ScatterDataExtract(context);
+    }
 
     @Override
     public CombinedData extract(ReadableMap propMap) {
