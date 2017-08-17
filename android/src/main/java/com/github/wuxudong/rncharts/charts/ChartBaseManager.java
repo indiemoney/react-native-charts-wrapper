@@ -165,6 +165,16 @@ public abstract class ChartBaseManager<T extends Chart, U extends Entry> extends
         chart.setDragDecelerationFrictionCoef(coef);
     }
 
+    @ReactProp(name = "highlightPerTapEnabled")
+    public void setHighlightPerTapEnabled(Chart chart, boolean enabled) {
+        chart.setHighlightPerTapEnabled(enabled);
+    }
+
+    @ReactProp(name = "maxHighlightDistance")
+    public void setMaxHighlightDistance(Chart chart, float dist) {
+        chart.setMaxHighlightDistance(dist);
+    }
+
     /**
      * Animations docs: https://github.com/PhilJay/MPAndroidChart/wiki/Animations
      */
