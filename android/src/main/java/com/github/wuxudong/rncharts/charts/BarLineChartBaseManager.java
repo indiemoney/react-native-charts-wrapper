@@ -62,6 +62,16 @@ public abstract class BarLineChartBaseManager<T extends BarLineChartBase, U exte
         chart.setAutoScaleMinMaxEnabled(enabled);
     }
 
+    @ReactProp(name = "visibleXRangeMinimum")
+    public void setVisibleXRangeMinimum(BarLineChartBase chart, float min) {
+        chart.setVisibleXRangeMinimum(min);
+    }
+
+    @ReactProp(name = "visibleXRangeMaximum")
+    public void setVisibleXRangeMaximum(BarLineChartBase chart, float max) {
+        chart.setVisibleXRangeMaximum(max);
+    }
+
     @ReactProp(name = "keepPositionOnRotation")
     public void setKeepPositionOnRotation(BarLineChartBase chart, boolean enabled) {
         chart.setKeepPositionOnRotation(enabled);
