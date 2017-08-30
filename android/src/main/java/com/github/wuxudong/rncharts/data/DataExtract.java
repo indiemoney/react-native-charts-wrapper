@@ -109,6 +109,9 @@ public abstract class DataExtract<D extends ChartData, U extends Entry> {
                 m.postTranslate(offsetLeft, offsetTop);
 
                 Paint p = new Paint();
+                p.setAntiAlias(true);
+                p.setDither(true);
+                p.setFilterBitmap(true);
                 p.setColorFilter(new PorterDuffColorFilter(color, PorterDuff.Mode.SRC_ATOP));
                 Log.d("React-native-charts-wrapper", "drew bitmap " + color);
                 c.drawBitmap(b, m, p);
@@ -130,6 +133,9 @@ public abstract class DataExtract<D extends ChartData, U extends Entry> {
         float cy = icon.hasKey("cy") ? (float) icon.getDouble("cy") : 0f;
 
         Paint p = new Paint();
+        p.setAntiAlias(true);
+        p.setDither(true);
+        p.setFilterBitmap(true);
         p.setColorFilter(new PorterDuffColorFilter(color, PorterDuff.Mode.SRC_ATOP));
         c.drawCircle(cx, cy, radius, p);
     }
@@ -144,6 +150,10 @@ public abstract class DataExtract<D extends ChartData, U extends Entry> {
         float cy = icon.hasKey("cy") ? (float) icon.getDouble("cy") : 0f;
 
         Paint p = new Paint();
+        p.setAntiAlias(true);
+        p.setDither(true);
+        p.setFilterBitmap(true);
+
         if (fontPath != null) {
             Typeface tf = Typeface.createFromAsset(context.getAssets(), fontPath);
             p.setTypeface(tf);
@@ -181,7 +191,11 @@ public abstract class DataExtract<D extends ChartData, U extends Entry> {
                 }
             }
 
-            drawable = new BitmapDrawable(context.getResources(), b);
+            BitmapDrawable bd = new BitmapDrawable(context.getResources(), b);
+            bd.setAntiAlias(true);
+            bd.setFilterBitmap(true);
+            drawable = (Drawable) bd;
+
         }
         return drawable;
     }
