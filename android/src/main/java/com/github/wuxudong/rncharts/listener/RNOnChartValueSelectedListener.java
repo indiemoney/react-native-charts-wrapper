@@ -10,6 +10,8 @@ import com.github.mikephil.charting.highlight.Highlight;
 import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
 import com.github.wuxudong.rncharts.utils.EntryToWritableMapUtils;
 
+import android.os.Handler;
+import java.lang.Runnable;
 import java.lang.ref.WeakReference;
 
 /**
@@ -28,13 +30,24 @@ public class RNOnChartValueSelectedListener implements OnChartValueSelectedListe
     public void onValueSelected(Entry entry, Highlight h) {
 
         if (mWeakChart != null) {
-            Chart chart = mWeakChart.get();
+            final Chart chart = mWeakChart.get();
 
             ReactContext reactContext = (ReactContext) chart.getContext();
             reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(
                     chart.getId(),
                     "topSelect",
                     EntryToWritableMapUtils.convertEntryToWritableMap(entry));
+            
+            // Hack: unhighlight all values to trigger callback on re-taps
+            // Ideal fix: alter native library to support flag passed in
+            final Handler handler = new Handler();
+            Runnable r = new Runnable() {
+                    @Override
+                    public void run() {
+                        chart.highlightValue(null, false);
+                    }
+                };
+            handler.post(r);
         }
     }
 
