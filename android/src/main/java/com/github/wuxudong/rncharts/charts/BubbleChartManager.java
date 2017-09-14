@@ -1,5 +1,6 @@
 package com.github.wuxudong.rncharts.charts;
 
+import android.content.Context;
 
 import com.facebook.react.uimanager.ThemedReactContext;
 import com.github.mikephil.charting.charts.BubbleChart;
@@ -26,7 +27,7 @@ public class BubbleChartManager extends ChartBaseManager<BubbleChart, BubbleEntr
 
 
     @Override
-    DataExtract getDataExtract() {
+    DataExtract getDataExtract(Context context) {
         return new BubbleDataExtract();
     }
 }

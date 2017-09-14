@@ -1,5 +1,6 @@
 package com.github.wuxudong.rncharts.charts;
 
+import android.content.Context;
 
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
@@ -38,7 +39,7 @@ public class ScatterChartManager extends BarLineChartBaseManager<ScatterChart, E
 
 
     @Override
-    DataExtract getDataExtract() {
-        return new ScatterDataExtract();
+    DataExtract getDataExtract(Context context) {
+        return new ScatterDataExtract(context);
     }
 }

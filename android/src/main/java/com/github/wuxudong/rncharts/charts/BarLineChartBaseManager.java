@@ -107,6 +107,11 @@ public abstract class BarLineChartBaseManager<T extends BarLineChartBase, U exte
         chart.setDoubleTapToZoomEnabled(enabled);
     }
 
+    @ReactProp(name = "highlightPerDragEnabled")
+    public void setHighlightPerDragEnabled(BarLineChartBase chart, boolean enabled) {
+        chart.setHighlightPerDragEnabled(enabled);
+    }
+
     @ReactProp(name = "zoom")
     public void setZoom(BarLineChartBase chart, ReadableMap propMap) {
         if (BridgeUtils.validate(propMap, ReadableType.Number, "scaleX") &&

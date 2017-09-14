@@ -10,6 +10,7 @@ import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.interfaces.datasets.IDataSet;
 import com.github.wuxudong.rncharts.utils.BridgeUtils;
 
+import android.content.Context;
 import java.util.ArrayList;
 
 /**
@@ -17,11 +18,19 @@ import java.util.ArrayList;
  */
 
 public class CombinedDataExtract extends DataExtract<CombinedData, Entry> {
-    private LineDataExtract lineDataExtract = new LineDataExtract();
+    private LineDataExtract lineDataExtract;
     private BarDataExtract barDataExtract = new BarDataExtract();
-    private ScatterDataExtract scatterDataExtract = new ScatterDataExtract();
+    private ScatterDataExtract scatterDataExtract;
     private CandleDataExtract candleDataExtract = new CandleDataExtract();
     private BubbleDataExtract bubbleDataExtract = new BubbleDataExtract();
+
+    public CombinedDataExtract() { }
+
+    public CombinedDataExtract(Context context) {
+        super();
+        lineDataExtract = new LineDataExtract(context);
+        scatterDataExtract = new ScatterDataExtract(context);
+    }
 
     @Override
     public CombinedData extract(ReadableMap propMap) {

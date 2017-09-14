@@ -11,6 +11,8 @@ import com.github.wuxudong.rncharts.utils.BridgeUtils;
 import com.github.wuxudong.rncharts.utils.ChartDataSetConfigUtils;
 import com.github.wuxudong.rncharts.utils.ConversionUtil;
 
+import android.content.Context;
+import android.graphics.drawable.Drawable;
 import java.util.ArrayList;
 
 /**
@@ -18,6 +20,15 @@ import java.util.ArrayList;
  */
 
 public class LineDataExtract extends DataExtract<LineData, Entry> {
+    private Context mContext;
+
+    public LineDataExtract() { }
+
+    public LineDataExtract(Context context) {
+        super();
+        mContext = context;
+    }
+
     @Override
     LineData createData() {
         return new LineData();
@@ -93,7 +104,9 @@ public class LineDataExtract extends DataExtract<LineData, Entry> {
             if (map.hasKey("x")) {
                 x = (float) map.getDouble("x");
             }
-            entry = new Entry(x, (float) map.getDouble("y"), ConversionUtil.toMap(map));
+
+            Drawable drawable = getIconDrawable(mContext, map);
+            entry = new Entry(x, (float) map.getDouble("y"), drawable, ConversionUtil.toMap(map));
         } else if (ReadableType.Number.equals(values.getType(index))) {
             entry = new Entry(x, (float) values.getDouble(index));
         } else {

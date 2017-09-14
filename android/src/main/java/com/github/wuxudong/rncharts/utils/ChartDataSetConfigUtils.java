@@ -33,6 +33,10 @@ public class ChartDataSetConfigUtils {
             dataSet.setDrawValues(config.getBoolean("drawValues"));
         }
 
+        if (BridgeUtils.validate(config, ReadableType.Boolean, "drawIcons")) {
+            dataSet.setDrawIcons(config.getBoolean("drawIcons"));
+        }
+
         if (BridgeUtils.validate(config, ReadableType.Boolean, "highlightEnabled")) {
             dataSet.setHighlightEnabled(config.getBoolean("highlightEnabled"));
         }

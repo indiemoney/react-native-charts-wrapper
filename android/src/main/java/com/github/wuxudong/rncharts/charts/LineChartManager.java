@@ -1,5 +1,6 @@
 package com.github.wuxudong.rncharts.charts;
 
+import android.content.Context;
 
 import com.facebook.react.uimanager.ThemedReactContext;
 import com.github.mikephil.charting.charts.LineChart;
@@ -25,7 +26,7 @@ public class LineChartManager extends BarLineChartBaseManager<LineChart, Entry> 
     }
 
     @Override
-    DataExtract getDataExtract() {
-        return new LineDataExtract();
+    DataExtract getDataExtract(Context context) {
+        return new LineDataExtract(context);
     }
 }
