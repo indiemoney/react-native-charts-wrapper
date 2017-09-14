@@ -7,6 +7,7 @@ import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.interfaces.datasets.IDataSet;
+import com.github.wuxudong.rncharts.formatters.ReverseFillFormatter;
 import com.github.wuxudong.rncharts.utils.BridgeUtils;
 import com.github.wuxudong.rncharts.utils.ChartDataSetConfigUtils;
 import com.github.wuxudong.rncharts.utils.ConversionUtil;
@@ -91,6 +92,11 @@ public class LineDataExtract extends DataExtract<LineData, Entry> {
             }
 
             lineDataSet.enableDashedLine(lineLength, spaceLength, phase);
+        }
+
+        if (BridgeUtils.validate(config, ReadableType.Boolean, "reverseFill")
+                && config.getBoolean("reverseFill")) {
+            lineDataSet.setFillFormatter(new ReverseFillFormatter());
         }
     }
 
