@@ -1,5 +1,6 @@
 package com.github.wuxudong.rncharts.charts;
 
+import android.content.Context;
 
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.uimanager.ThemedReactContext;
@@ -29,7 +30,7 @@ public class RadarChartManager extends YAxisChartBase<RadarChart, RadarEntry> {
     }
 
     @Override
-    DataExtract getDataExtract() {
+    DataExtract getDataExtract(Context context) {
         return new RadarDataExtract();
     }
 

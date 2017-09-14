@@ -1,5 +1,6 @@
 package com.github.wuxudong.rncharts.charts;
 
+import android.content.Context;
 import android.content.res.ColorStateList;
 import android.os.Build;
 
@@ -31,7 +32,7 @@ import com.github.wuxudong.rncharts.utils.BridgeUtils;
 public abstract class ChartBaseManager<T extends Chart, U extends Entry> extends SimpleViewManager {
 
 
-    abstract DataExtract getDataExtract();
+    abstract DataExtract getDataExtract(Context context);
 
     /**
      * More details about legend customization: https://github.com/PhilJay/MPAndroidChart/wiki/Legend
@@ -388,7 +389,7 @@ public abstract class ChartBaseManager<T extends Chart, U extends Entry> extends
      */
     @ReactProp(name = "data")
     public void setData(Chart chart, ReadableMap propMap) {
-        chart.setData(getDataExtract().extract(propMap));
+        chart.setData(getDataExtract(chart.getContext()).extract(propMap));
         chart.invalidate();
     }
 

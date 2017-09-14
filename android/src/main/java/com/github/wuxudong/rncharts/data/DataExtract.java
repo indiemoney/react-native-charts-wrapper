@@ -3,16 +3,15 @@ package com.github.wuxudong.rncharts.data;
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.ReadableType;
-import com.facebook.react.uimanager.ThemedReactContext;
 import com.github.mikephil.charting.data.ChartData;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.interfaces.datasets.IDataSet;
 import com.github.wuxudong.rncharts.utils.BridgeUtils;
 
+import android.content.Context;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
-
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -88,7 +87,7 @@ public abstract class DataExtract<D extends ChartData, U extends Entry> {
     abstract U createEntry(ReadableArray values, int index);
 
 
-    private void drawBitmap(ThemedReactContext context, Canvas c, ReadableMap icon) {
+    private void drawBitmap(Context context, Canvas c, ReadableMap icon) {
         Bitmap b = null;
         InputStream is = null;
         String path = icon.hasKey("path") ? icon.getString("path") : null;
@@ -140,7 +139,7 @@ public abstract class DataExtract<D extends ChartData, U extends Entry> {
         c.drawCircle(cx, cy, radius, p);
     }
 
-    private void drawText(ThemedReactContext context, Canvas c, ReadableMap icon) {
+    private void drawText(Context context, Canvas c, ReadableMap icon) {
         String fontPath = icon.hasKey("path") ? icon.getString("path") : null;
         String text = icon.hasKey("text") ? icon.getString("text") : null;
         int color = icon.hasKey("color") ? icon.getInt("color") : Color.WHITE;
@@ -167,7 +166,7 @@ public abstract class DataExtract<D extends ChartData, U extends Entry> {
         }
     }
 
-    protected Drawable getIconDrawable(ThemedReactContext context, ReadableMap map) {
+    protected Drawable getIconDrawable(Context context, ReadableMap map) {
         if (!map.hasKey("icons")) {
             return null;
         }

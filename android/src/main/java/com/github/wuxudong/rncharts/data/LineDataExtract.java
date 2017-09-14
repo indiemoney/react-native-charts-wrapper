@@ -3,7 +3,6 @@ package com.github.wuxudong.rncharts.data;
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.ReadableType;
-import com.facebook.react.uimanager.ThemedReactContext;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
@@ -12,6 +11,7 @@ import com.github.wuxudong.rncharts.utils.BridgeUtils;
 import com.github.wuxudong.rncharts.utils.ChartDataSetConfigUtils;
 import com.github.wuxudong.rncharts.utils.ConversionUtil;
 
+import android.content.Context;
 import android.graphics.drawable.Drawable;
 import java.util.ArrayList;
 
@@ -20,11 +20,11 @@ import java.util.ArrayList;
  */
 
 public class LineDataExtract extends DataExtract<LineData, Entry> {
-    private ThemedReactContext mContext;
+    private Context mContext;
 
     public LineDataExtract() { }
 
-    public LineDataExtract(ThemedReactContext context) {
+    public LineDataExtract(Context context) {
         super();
         mContext = context;
     }

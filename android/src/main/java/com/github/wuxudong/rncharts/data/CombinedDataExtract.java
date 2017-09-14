@@ -3,7 +3,6 @@ package com.github.wuxudong.rncharts.data;
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.ReadableType;
-import com.facebook.react.uimanager.ThemedReactContext;
 import com.github.mikephil.charting.data.ChartData;
 import com.github.mikephil.charting.data.CombinedData;
 import com.github.mikephil.charting.data.Entry;
@@ -11,6 +10,7 @@ import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.interfaces.datasets.IDataSet;
 import com.github.wuxudong.rncharts.utils.BridgeUtils;
 
+import android.content.Context;
 import java.util.ArrayList;
 
 /**
@@ -26,7 +26,7 @@ public class CombinedDataExtract extends DataExtract<CombinedData, Entry> {
 
     public CombinedDataExtract() { }
 
-    public CombinedDataExtract(ThemedReactContext context) {
+    public CombinedDataExtract(Context context) {
         super();
         lineDataExtract = new LineDataExtract(context);
         scatterDataExtract = new ScatterDataExtract(context);

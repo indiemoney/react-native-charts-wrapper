@@ -1,5 +1,7 @@
 package com.github.wuxudong.rncharts.charts;
 
+import android.content.Context;
+
 import com.facebook.react.uimanager.ThemedReactContext;
 import com.github.mikephil.charting.charts.CandleStickChart;
 import com.github.mikephil.charting.data.CandleEntry;
@@ -25,7 +27,7 @@ public class CandleStickChartManager extends BarLineChartBaseManager<CandleStick
 
 
     @Override
-    DataExtract getDataExtract() {
+    DataExtract getDataExtract(Context context) {
         return new CandleDataExtract();
     }
 }

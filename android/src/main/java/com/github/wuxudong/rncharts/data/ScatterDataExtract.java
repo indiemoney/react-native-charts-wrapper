@@ -3,7 +3,6 @@ package com.github.wuxudong.rncharts.data;
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.ReadableType;
-import com.facebook.react.uimanager.ThemedReactContext;
 import com.github.mikephil.charting.charts.ScatterChart;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.ScatterData;
@@ -13,6 +12,7 @@ import com.github.wuxudong.rncharts.utils.BridgeUtils;
 import com.github.wuxudong.rncharts.utils.ChartDataSetConfigUtils;
 import com.github.wuxudong.rncharts.utils.ConversionUtil;
 
+import android.content.Context;
 import android.graphics.drawable.Drawable;
 import java.util.ArrayList;
 
@@ -21,11 +21,11 @@ import java.util.ArrayList;
  */
 
 public class ScatterDataExtract extends DataExtract<ScatterData, Entry> {
-    private ThemedReactContext mContext;
+    private Context mContext;
 
     public ScatterDataExtract() { }
 
-    public ScatterDataExtract(ThemedReactContext context) {
+    public ScatterDataExtract(Context context) {
         super();
         mContext = context;
     }

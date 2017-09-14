@@ -1,5 +1,6 @@
 package com.github.wuxudong.rncharts.charts;
 
+import android.content.Context;
 
 import com.facebook.react.uimanager.ThemedReactContext;
 import com.github.mikephil.charting.charts.LineChart;
@@ -11,8 +12,6 @@ import com.github.wuxudong.rncharts.listener.RNOnChartGestureListener;
 
 public class LineChartManager extends BarLineChartBaseManager<LineChart, Entry> {
 
-    private ThemedReactContext mContext;
-
     @Override
     public String getName() {
         return "RNLineChart";
@@ -20,7 +19,6 @@ public class LineChartManager extends BarLineChartBaseManager<LineChart, Entry> 
 
     @Override
     protected LineChart createViewInstance(ThemedReactContext reactContext) {
-        mContext = reactContext;
         LineChart lineChart =  new LineChart(reactContext);
         lineChart.setOnChartValueSelectedListener(new RNOnChartValueSelectedListener(lineChart));
         lineChart.setOnChartGestureListener(new RNOnChartGestureListener(lineChart));
@@ -28,7 +26,7 @@ public class LineChartManager extends BarLineChartBaseManager<LineChart, Entry> 
     }
 
     @Override
-    DataExtract getDataExtract() {
-        return new LineDataExtract(mContext);
+    DataExtract getDataExtract(Context context) {
+        return new LineDataExtract(context);
     }
 }
