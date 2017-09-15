@@ -176,6 +176,13 @@ public abstract class ChartBaseManager<T extends Chart, U extends Entry> extends
         chart.setMaxHighlightDistance(dist);
     }
 
+    @ReactProp(name = "resetHighlightValue")
+    public void resetHighlightValue(Chart chart, boolean reset) {
+        if (reset) {
+            chart.highlightValue(null, false);
+        }
+    }
+
     /**
      * Animations docs: https://github.com/PhilJay/MPAndroidChart/wiki/Animations
      */
