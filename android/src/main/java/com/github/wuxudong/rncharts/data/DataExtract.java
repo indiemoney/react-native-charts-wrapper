@@ -112,7 +112,6 @@ public abstract class DataExtract<D extends ChartData, U extends Entry> {
                 p.setDither(true);
                 p.setFilterBitmap(true);
                 p.setColorFilter(new PorterDuffColorFilter(color, PorterDuff.Mode.SRC_ATOP));
-                Log.d("React-native-charts-wrapper", "drew bitmap " + color);
                 c.drawBitmap(b, m, p);
             } catch (IOException e) {
                 Log.e("wuxudong/react-native-charts-wrapper", "Error creating icon drawable", e);
