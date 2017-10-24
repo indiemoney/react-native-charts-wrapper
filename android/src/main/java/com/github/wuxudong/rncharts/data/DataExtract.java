@@ -124,18 +124,20 @@ public abstract class DataExtract<D extends ChartData, U extends Entry> {
         }
     }
 
-    private void drawCircle(Canvas c, ReadableMap icon) {
+    private void drawSquare(Canvas c, ReadableMap icon) {
         int color = icon.hasKey("color") ? icon.getInt("color") : Color.WHITE;
-        float radius = icon.hasKey("radius") ? (float) icon.getDouble("radius") : 50f;
+        float size = icon.hasKey("size") ? (float) icon.getDouble("size") : 100f;
         float cx = icon.hasKey("cx") ? (float) icon.getDouble("cx") : 0f;
         float cy = icon.hasKey("cy") ? (float) icon.getDouble("cy") : 0f;
+        float r = icon.hasKey("r") ? (float) icon.getDouble("r") : 0f;
 
+        float d = size * 0.5f;
         Paint p = new Paint();
         p.setAntiAlias(true);
         p.setDither(true);
         p.setFilterBitmap(true);
         p.setColorFilter(new PorterDuffColorFilter(color, PorterDuff.Mode.SRC_ATOP));
-        c.drawCircle(cx, cy, radius, p);
+        c.drawRoundRect(cx - d, cy - d, cx + d, cy + d, r, r, p);
     }
 
     private void drawText(Context context, Canvas c, ReadableMap icon) {
@@ -183,7 +185,7 @@ public abstract class DataExtract<D extends ChartData, U extends Entry> {
                 String type = icon.hasKey("type") ? icon.getString("type") : "bitmap";
 
                 switch (type) {
-                case "circle": drawCircle(c, icon); break;
+                case "square": drawSquare(c, icon); break;
                 case "text": drawText(context, c, icon); break;
                 default: drawBitmap(context, c, icon); break;
                 }
