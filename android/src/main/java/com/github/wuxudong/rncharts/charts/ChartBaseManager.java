@@ -24,6 +24,7 @@ import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter;
 import com.github.mikephil.charting.formatter.LargeValueFormatter;
 import com.github.mikephil.charting.formatter.PercentFormatter;
+import com.github.mikephil.charting.highlight.Highlight;
 import com.github.wuxudong.rncharts.data.DataExtract;
 import com.github.wuxudong.rncharts.listener.RNOnChartValueSelectedListener;
 import com.github.wuxudong.rncharts.markers.RNRectangleMarkerView;
@@ -405,9 +406,20 @@ public abstract class ChartBaseManager<T extends Chart, U extends Entry> extends
      */
     @ReactProp(name = "highlightValue")
     public void setHighlightValue(Chart chart, ReadableMap propMap) {
+        Highlight h = new Highlight(
+            (float) propMap.getDouble("x"), 
+            Float.NaN, // y
+            propMap.getInt("dataSetIndex")
+        );
+
+        // dataIndex required for CombinedChart to pin point a highlight position
+        Integer dataIndex = propMap.getInt("dataIndex");
+        if (dataIndex != null) {
+            h.setDataIndex(dataIndex);
+        }
+
         chart.highlightValue(
-            (float) propMap.getDouble("x"),
-            propMap.getInt("dataSetIndex"),
+            h,
             propMap.getBoolean("callListener")
         );
     }

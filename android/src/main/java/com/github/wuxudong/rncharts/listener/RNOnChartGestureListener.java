@@ -24,7 +24,7 @@ public class RNOnChartGestureListener implements OnChartGestureListener {
         mWeakChart = new WeakReference<>(chart);
     }
 
-    private static WritableMap viewPortToWritableMap(Chart chart, String eventName) {
+    private static WritableMap viewPortToWritableMap(Chart chart, String eventName, MotionEvent me) {
         WritableMap map = new WritableNativeMap();
         map.putString("eventName", eventName);
         map.putDouble("transX", chart.getViewPortHandler().getTransX());
@@ -33,11 +33,13 @@ public class RNOnChartGestureListener implements OnChartGestureListener {
         map.putDouble("scaleY", chart.getViewPortHandler().getScaleY());
         map.putDouble("chartWidth", chart.getViewPortHandler().getChartWidth());
         map.putDouble("chartHeight", chart.getViewPortHandler().getChartHeight());
+        map.putDouble("touchX", me.getX());
+        map.putDouble("touchY", me.getY());
 
         return map;
     }
 
-    private void handleEvent(String eventName) {
+    private void handleEvent(String eventName, MotionEvent me) {
         if (mWeakChart != null) {
             Chart chart = mWeakChart.get();
 
@@ -45,37 +47,37 @@ public class RNOnChartGestureListener implements OnChartGestureListener {
             reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(
                     chart.getId(),
                     "topMessage",
-                    viewPortToWritableMap(chart, eventName));
+                    viewPortToWritableMap(chart, eventName, me));
         }
     }
-    
+
     @Override
     public void onChartGestureStart(MotionEvent me, ChartTouchListener.ChartGesture lastPerformedGesture) {
-        handleEvent("onGestureStart");
+        handleEvent("onGestureStart", me);
     }
 
     @Override
     public void onChartGestureEnd(MotionEvent me, ChartTouchListener.ChartGesture lastPerformedGesture) {
-        handleEvent("onGestureEnd");
+        handleEvent("onGestureEnd", me);
     }
 
     
     @Override
-    public void onChartLongPressed(MotionEvent me) { handleEvent("onLongPressed"); }
+    public void onChartLongPressed(MotionEvent me) { handleEvent("onLongPressed", me); }
 
     @Override
-    public void onChartDoubleTapped(MotionEvent me) { handleEvent("onDoubleTapped"); }
+    public void onChartDoubleTapped(MotionEvent me) { handleEvent("onDoubleTapped", me); }
 
     @Override
-    public void onChartSingleTapped(MotionEvent me) { handleEvent("onSingleTapped"); }
+    public void onChartSingleTapped(MotionEvent me) { handleEvent("onSingleTapped", me); }
 
     @Override
-    public void onChartFling(MotionEvent me1, MotionEvent me2, float velocityX, float velocityY) { handleEvent("onFling"); }
+    public void onChartFling(MotionEvent me1, MotionEvent me2, float velocityX, float velocityY) { handleEvent("onFling", me1); }
 
     @Override
-    public void onChartScale(MotionEvent me, float scaleX, float scaleY) { handleEvent("onScale"); }
+    public void onChartScale(MotionEvent me, float scaleX, float scaleY) { handleEvent("onScale", me); }
 
     @Override
-    public void onChartTranslate(MotionEvent me, float dX, float dY) { handleEvent("onTranslate"); }
+    public void onChartTranslate(MotionEvent me, float dX, float dY) { handleEvent("onTranslate", me); }
 
 }
