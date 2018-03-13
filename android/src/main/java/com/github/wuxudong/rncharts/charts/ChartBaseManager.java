@@ -3,6 +3,9 @@ package com.github.wuxudong.rncharts.charts;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.os.Build;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
@@ -25,6 +28,7 @@ import com.github.mikephil.charting.formatter.IndexAxisValueFormatter;
 import com.github.mikephil.charting.formatter.LargeValueFormatter;
 import com.github.mikephil.charting.formatter.PercentFormatter;
 import com.github.mikephil.charting.highlight.Highlight;
+import com.github.mikephil.charting.data.ChartData;
 import com.github.wuxudong.rncharts.data.DataExtract;
 import com.github.wuxudong.rncharts.listener.RNOnChartValueSelectedListener;
 import com.github.wuxudong.rncharts.markers.RNRectangleMarkerView;
@@ -32,6 +36,39 @@ import com.github.wuxudong.rncharts.utils.BridgeUtils;
 
 public abstract class ChartBaseManager<T extends Chart, U extends Entry> extends SimpleViewManager {
 
+    /**
+     * Stores props that can only be set after chart data is set. 
+     * Key is the prop name and value is the ReadableMap passed in from js.
+     *
+     * Note: RN does not gurantee in what order the prop setters defined via @ReactProp
+     * are called (e.g may not be the same order props are specified).
+     */
+    private Map<String, ReadableMap> mDataDependentProps = new HashMap<String, ReadableMap>();
+
+    /**
+     * Sets the data dependent props stored in mDataDependentProps. 
+     * Clears mDataDependentProps afterwards.
+     */
+    private void setDataDependentProps(Chart chart) {
+        if (chart.getData() == null) {
+            throw new IllegalStateException("chart data must be set before setting data dependent props");
+        }
+
+        Iterator<Map.Entry<String, ReadableMap>> it = mDataDependentProps.entrySet().iterator();
+        while (it.hasNext()) {
+            Map.Entry<String, ReadableMap> pair = it.next();
+            String propName = pair.getKey();
+            switch (propName) {
+                case "highlightValue":
+                    setHighlightValue(chart, pair.getValue());
+                    break;
+                default:
+                    throw new IllegalArgumentException("Undefined data dependent prop: " + propName);
+            }
+        }
+
+        mDataDependentProps = new HashMap<String, ReadableMap>();
+    }
 
     abstract DataExtract getDataExtract(Context context);
 
@@ -397,8 +434,13 @@ public abstract class ChartBaseManager<T extends Chart, U extends Entry> extends
      */
     @ReactProp(name = "data")
     public void setData(Chart chart, ReadableMap propMap) {
-        chart.setData(getDataExtract(chart.getContext()).extract(propMap));
-        chart.invalidate();
+        ChartData data = getDataExtract(chart.getContext()).extract(propMap);
+        // data maybe null when the prop is removed temporarily from js side
+        if (data != null) {
+            chart.setData(data);
+            chart.invalidate();
+            setDataDependentProps(chart);
+        }
     }
 
     /**
@@ -406,21 +448,30 @@ public abstract class ChartBaseManager<T extends Chart, U extends Entry> extends
      */
     @ReactProp(name = "highlightValue")
     public void setHighlightValue(Chart chart, ReadableMap propMap) {
-        Highlight h = new Highlight(
-            (float) propMap.getDouble("x"), 
-            Float.NaN, // y
-            propMap.getInt("dataSetIndex")
-        );
+        // chart.highlightValue must be called after data is set or a NPE would occur
+        if (chart.getData() == null) {
+            mDataDependentProps.put("highlightValue", propMap);
+        } else {
+            Highlight h = new Highlight(
+                (float) propMap.getDouble("x"), 
+                Float.NaN, // y
+                propMap.getInt("dataSetIndex")
+            );
 
-        // dataIndex required for CombinedChart to pin point a highlight position
-        Integer dataIndex = propMap.getInt("dataIndex");
-        if (dataIndex != null) {
-            h.setDataIndex(dataIndex);
+            // dataIndex required for CombinedChart to pin point a highlight position
+            Integer dataIndex = null;
+            if (BridgeUtils.validate(propMap, ReadableType.Number, "dataIndex")) {
+                dataIndex = propMap.getInt("dataIndex");
+            }
+            if (dataIndex != null) {
+                h.setDataIndex(dataIndex);
+            }
+
+            chart.highlightValue(
+                h,
+                propMap.getBoolean("callListener")
+            );
         }
-
-        chart.highlightValue(
-            h,
-            propMap.getBoolean("callListener")
-        );
     }
+
 }
