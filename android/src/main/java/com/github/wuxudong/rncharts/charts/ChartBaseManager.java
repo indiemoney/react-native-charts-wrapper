@@ -67,7 +67,7 @@ public abstract class ChartBaseManager<T extends Chart, U extends Entry> extends
             }
         }
 
-        mDataDependentProps = new HashMap<String, ReadableMap>();
+        mDataDependentProps.clear();
     }
 
     abstract DataExtract getDataExtract(Context context);
