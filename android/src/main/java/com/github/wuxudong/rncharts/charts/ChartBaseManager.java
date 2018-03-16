@@ -24,6 +24,9 @@ import com.github.mikephil.charting.components.LimitLine;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.components.XAxis.XAxisPosition;
 import com.github.mikephil.charting.data.Entry;
+import com.github.mikephil.charting.data.CombinedData;
+import com.github.mikephil.charting.data.ChartData;
+import com.github.mikephil.charting.interfaces.datasets.IDataSet;
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter;
 import com.github.mikephil.charting.formatter.LargeValueFormatter;
 import com.github.mikephil.charting.formatter.PercentFormatter;
@@ -472,6 +475,46 @@ public abstract class ChartBaseManager<T extends Chart, U extends Entry> extends
                 propMap.getBoolean("callListener")
             );
         }
+    }
+
+    /**
+     * toggle highlightEnabled. propMap includes:
+     * enabled - boolean
+     * dataSetIndex - optional int, apply to all dataSets of given data if not specified
+     * dataIndex - optional int, required for CombinedChart
+     */
+    @ReactProp(name = "highlightEnabled")
+    public void setHighlightEnabled(Chart chart, ReadableMap propMap) {
+        // chart.highlightEnabled must be called after data is set or a NPE would occur
+        if (chart.getData() == null) {
+            mDataDependentProps.put("highlightEnabled", propMap);
+        } else {
+            Integer dataSetIndex = null;
+            Integer dataIndex = null;
+            boolean isEnabled = propMap.getBoolean("enabled");
+
+            if (BridgeUtils.validate(propMap, ReadableType.Number, "dataSetIndex")) {
+                dataSetIndex = propMap.getInt("dataSetIndex");
+            }
+
+            if (BridgeUtils.validate(propMap, ReadableType.Number, "dataIndex")) {
+                dataIndex = propMap.getInt("dataIndex");
+            }
+
+            ChartData data = 
+                (chart.getData() instanceof CombinedData) ? 
+                ((CombinedData)chart.getData()).getAllData().get(dataIndex) : 
+                chart.getData();
+
+
+
+            if (dataSetIndex != null) {
+                ((IDataSet)data.getDataSets().get(dataSetIndex)).setHighlightEnabled(isEnabled);
+            } else {
+                data.setHighlightEnabled(isEnabled);
+            }
+        }
+
     }
 
 }
