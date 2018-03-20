@@ -24,6 +24,9 @@ import com.github.mikephil.charting.components.LimitLine;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.components.XAxis.XAxisPosition;
 import com.github.mikephil.charting.data.Entry;
+import com.github.mikephil.charting.data.CombinedData;
+import com.github.mikephil.charting.data.ChartData;
+import com.github.mikephil.charting.interfaces.datasets.IDataSet;
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter;
 import com.github.mikephil.charting.formatter.LargeValueFormatter;
 import com.github.mikephil.charting.formatter.PercentFormatter;
@@ -38,29 +41,33 @@ public abstract class ChartBaseManager<T extends Chart, U extends Entry> extends
 
     /**
      * Stores props that can only be set after chart data is set. 
-     * Key is the prop name and value is the ReadableMap passed in from js.
+     * Key is the prop name and value is the ReadableMap or ReadableArray passed in from js.
      *
      * Note: RN does not gurantee in what order the prop setters defined via @ReactProp
      * are called (e.g may not be the same order props are specified).
      */
-    private Map<String, ReadableMap> mDataDependentProps = new HashMap<String, ReadableMap>();
+    private Map<String, Object> mDataDependentProps = new HashMap<String, Object>();
 
     /**
      * Sets the data dependent props stored in mDataDependentProps. 
      * Clears mDataDependentProps afterwards.
      */
     private void setDataDependentProps(Chart chart) {
+
         if (chart.getData() == null) {
             throw new IllegalStateException("chart data must be set before setting data dependent props");
         }
 
-        Iterator<Map.Entry<String, ReadableMap>> it = mDataDependentProps.entrySet().iterator();
+        Iterator<Map.Entry<String, Object>> it = mDataDependentProps.entrySet().iterator();
         while (it.hasNext()) {
-            Map.Entry<String, ReadableMap> pair = it.next();
+            Map.Entry<String, Object> pair = it.next();
             String propName = pair.getKey();
             switch (propName) {
                 case "highlightValue":
-                    setHighlightValue(chart, pair.getValue());
+                    setHighlightValue(chart, (ReadableMap)pair.getValue());
+                    break;
+                case "highlightEnabled":
+                    setHighlightEnabled(chart, (ReadableArray)pair.getValue());
                     break;
                 default:
                     throw new IllegalArgumentException("Undefined data dependent prop: " + propName);
@@ -471,6 +478,52 @@ public abstract class ChartBaseManager<T extends Chart, U extends Entry> extends
                 h,
                 propMap.getBoolean("callListener")
             );
+        }
+    }
+
+    /**
+     * toggle highlightEnabled. propMap is an array of:
+     * enabled - boolean
+     * dataSetIndex - optional int, apply to all dataSets of given data if not specified
+     * dataIndex - optional int, required for CombinedChart
+     */
+    @ReactProp(name = "highlightEnabled")
+    public void setHighlightEnabled(Chart chart, ReadableArray readableArray) {
+        // chart.highlightEnabled must be called after data is set or a NPE would occur
+        if (chart.getData() == null) {
+            mDataDependentProps.put("highlightEnabled", readableArray);
+        } else {
+            for (int i = 0; i < readableArray.size(); i++) {
+                if (!ReadableType.Map.equals(readableArray.getType(i))) {
+                    throw new IllegalArgumentException("Expecting array of maps");
+                }
+
+                ReadableMap propMap = readableArray.getMap(i);
+                Integer dataSetIndex = null;
+                Integer dataIndex = null;
+                boolean isEnabled = propMap.getBoolean("enabled");
+
+                if (BridgeUtils.validate(propMap, ReadableType.Number, "dataSetIndex")) {
+                    dataSetIndex = propMap.getInt("dataSetIndex");
+                }
+
+                if (BridgeUtils.validate(propMap, ReadableType.Number, "dataIndex")) {
+                    dataIndex = propMap.getInt("dataIndex");
+                }
+
+                ChartData data = 
+                    (chart.getData() instanceof CombinedData) ? 
+                    ((CombinedData)chart.getData()).getAllData().get(dataIndex) : 
+                    chart.getData();
+
+                if (dataSetIndex != null) {
+                    ((IDataSet)data.getDataSets().get(dataSetIndex)).setHighlightEnabled(isEnabled);
+                } else {
+                    data.setHighlightEnabled(isEnabled);
+                }
+
+            }
+
         }
     }
 
