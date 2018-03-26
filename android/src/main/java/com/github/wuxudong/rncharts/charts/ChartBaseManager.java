@@ -23,6 +23,7 @@ import com.github.mikephil.charting.components.LegendEntry;
 import com.github.mikephil.charting.components.LimitLine;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.components.XAxis.XAxisPosition;
+import com.github.mikephil.charting.components.MarkerImage;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.CombinedData;
 import com.github.mikephil.charting.data.ChartData;
@@ -304,6 +305,39 @@ public abstract class ChartBaseManager<T extends Chart, U extends Entry> extends
         if (BridgeUtils.validate(propMap, ReadableType.Number, "textSize")) {
             marker.getTvContent().setTextSize(propMap.getInt("textSize"));
         }
+
+        chart.setMarker(marker);
+    }
+
+    @ReactProp(name = "imageMarker")
+    public void setImageMarker(Chart chart, ReadableMap propMap) {
+        if (!BridgeUtils.validate(propMap, ReadableType.Boolean, "enabled") || !propMap.getBoolean("enabled")) {
+            chart.setMarker(null);
+            return;
+        }
+
+        if (!BridgeUtils.validate(propMap, ReadableType.String, "resourceName")) {
+            throw new IllegalArgumentException("expecting resourceName for imageMarker");
+        }
+
+        String resourceName = propMap.getString("resourceName");
+        Float offsetX = 0f;
+        Float offsetY = 0f;
+
+        if (BridgeUtils.validate(propMap, ReadableType.Number, "offsetX")) {
+            offsetX = (float)propMap.getDouble("offsetX");
+        }
+        if (BridgeUtils.validate(propMap, ReadableType.Number, "offsetY")) {
+            offsetY = (float)propMap.getDouble("offsetY");
+        }
+
+        MarkerImage marker = new MarkerImage(
+            chart.getContext(), 
+            chart.getContext()
+            .getResources()
+            .getIdentifier(resourceName, "drawable", chart.getContext().getPackageName()));
+        
+        marker.setOffset(offsetX, offsetY);
 
         chart.setMarker(marker);
     }
