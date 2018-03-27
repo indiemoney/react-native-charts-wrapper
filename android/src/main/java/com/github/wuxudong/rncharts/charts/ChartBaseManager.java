@@ -6,6 +6,7 @@ import android.os.Build;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.List;
 
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
@@ -23,7 +24,6 @@ import com.github.mikephil.charting.components.LegendEntry;
 import com.github.mikephil.charting.components.LimitLine;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.components.XAxis.XAxisPosition;
-import com.github.mikephil.charting.components.MarkerImage;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.CombinedData;
 import com.github.mikephil.charting.data.ChartData;
@@ -38,6 +38,8 @@ import com.github.wuxudong.rncharts.data.DataExtract;
 import com.github.wuxudong.rncharts.listener.RNOnChartValueSelectedListener;
 import com.github.wuxudong.rncharts.markers.RNRectangleMarkerView;
 import com.github.wuxudong.rncharts.utils.BridgeUtils;
+import com.github.wuxudong.rncharts.markers.RNConditionalMarkerImage;
+import com.github.wuxudong.rncharts.markers.IMarkerConditionFn;
 
 public abstract class ChartBaseManager<T extends Chart, U extends Entry> extends SimpleViewManager {
 
@@ -340,11 +342,34 @@ public abstract class ChartBaseManager<T extends Chart, U extends Entry> extends
             height = (float)propMap.getDouble("height");
         }
 
-        MarkerImage marker = new MarkerImage(
+        // skip drawing halo on highlighted unless it represents a single goal
+        IMarkerConditionFn skipNonGoal = new IMarkerConditionFn() {
+
+            @Override
+            public boolean call(Entry e, Highlight h) {
+                boolean skip = true;
+            
+                if (e.getData() instanceof Map) {
+                    if(((Map) e.getData()).containsKey("goalIds")) {
+                        List goalIds = ((List)(((Map)e.getData()).get("goalIds")));
+
+                        if (goalIds != null && goalIds.size() == 1) {
+                            skip = false;
+                        }
+
+                    }
+                }
+
+                return skip;
+            }  
+        };
+
+        RNConditionalMarkerImage marker = new RNConditionalMarkerImage(
             chart.getContext(), 
             chart.getContext()
             .getResources()
-            .getIdentifier(resourceName, "drawable", chart.getContext().getPackageName()));
+            .getIdentifier(resourceName, "drawable", chart.getContext().getPackageName()),
+            skipNonGoal);
         
         marker.setOffset(offsetX, offsetY);
         marker.setSize(new FSize(width, height));
