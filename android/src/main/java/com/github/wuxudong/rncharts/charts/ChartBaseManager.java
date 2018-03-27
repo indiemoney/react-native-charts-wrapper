@@ -33,6 +33,7 @@ import com.github.mikephil.charting.formatter.LargeValueFormatter;
 import com.github.mikephil.charting.formatter.PercentFormatter;
 import com.github.mikephil.charting.highlight.Highlight;
 import com.github.mikephil.charting.data.ChartData;
+import com.github.mikephil.charting.utils.FSize;
 import com.github.wuxudong.rncharts.data.DataExtract;
 import com.github.wuxudong.rncharts.listener.RNOnChartValueSelectedListener;
 import com.github.wuxudong.rncharts.markers.RNRectangleMarkerView;
@@ -323,12 +324,20 @@ public abstract class ChartBaseManager<T extends Chart, U extends Entry> extends
         String resourceName = propMap.getString("resourceName");
         Float offsetX = 0f;
         Float offsetY = 0f;
+        Float width = 0f;
+        Float height = 0f;
 
         if (BridgeUtils.validate(propMap, ReadableType.Number, "offsetX")) {
             offsetX = (float)propMap.getDouble("offsetX");
         }
         if (BridgeUtils.validate(propMap, ReadableType.Number, "offsetY")) {
             offsetY = (float)propMap.getDouble("offsetY");
+        }
+        if (BridgeUtils.validate(propMap, ReadableType.Number, "width")) {
+            width = (float)propMap.getDouble("width");
+        }
+        if (BridgeUtils.validate(propMap, ReadableType.Number, "height")) {
+            height = (float)propMap.getDouble("height");
         }
 
         MarkerImage marker = new MarkerImage(
@@ -338,6 +347,7 @@ public abstract class ChartBaseManager<T extends Chart, U extends Entry> extends
             .getIdentifier(resourceName, "drawable", chart.getContext().getPackageName()));
         
         marker.setOffset(offsetX, offsetY);
+        marker.setSize(new FSize(width, height));
 
         chart.setMarker(marker);
     }
