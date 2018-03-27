@@ -39,8 +39,10 @@ public class RNConditionalMarkerImage extends MarkerImage {
     
     @Override
     public void refreshContent(Entry e, Highlight highlight) {
-        mSkipDraw = mConditionFn.call(e, highlight);
-        
+        if (mConditionFn != null) {
+            mSkipDraw = mConditionFn.call(e, highlight);
+        }
+                
         super.refreshContent(e, highlight);
     }
     
