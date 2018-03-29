@@ -39,7 +39,6 @@ import com.github.wuxudong.rncharts.listener.RNOnChartValueSelectedListener;
 import com.github.wuxudong.rncharts.markers.RNRectangleMarkerView;
 import com.github.wuxudong.rncharts.utils.BridgeUtils;
 import com.github.wuxudong.rncharts.markers.RNConditionalMarkerImage;
-import com.github.wuxudong.rncharts.markers.IMarkerConditionFn;
 import com.github.wuxudong.rncharts.highlight.HighlightWithMeta;
 import com.github.wuxudong.rncharts.utils.ConversionUtil;
 
@@ -330,7 +329,7 @@ public abstract class ChartBaseManager<T extends Chart, U extends Entry> extends
         Float offsetY = 0f;
         Float width = 0f;
         Float height = 0f;
-        Boolean skipGroupedGoals = false;
+        ReadableArray excludes = null;
 
         if (BridgeUtils.validate(propMap, ReadableType.Number, "offsetX")) {
             offsetX = (float)propMap.getDouble("offsetX");
@@ -344,46 +343,16 @@ public abstract class ChartBaseManager<T extends Chart, U extends Entry> extends
         if (BridgeUtils.validate(propMap, ReadableType.Number, "height")) {
             height = (float)propMap.getDouble("height");
         }
-        if (BridgeUtils.validate(propMap, ReadableType.Boolean, "skipGroupedGoals")) {
-            skipGroupedGoals = (boolean)propMap.getBoolean("skipGroupedGoals");
+        if (BridgeUtils.validate(propMap, ReadableType.Array, "excludes")) {
+            excludes = propMap.getArray("excludes");
         }
-
-        IMarkerConditionFn skipNonGoal = 
-            skipGroupedGoals ? 
-            // skip drawing halo on highlighted unless it represents a single goal or highlight was set programatically
-            new IMarkerConditionFn() {
-
-                @Override
-                public boolean call(Entry e, Highlight h) {
-                    boolean skip = true;
-                    Map entryData = (e.getData() instanceof Map) ? (Map)e.getData() : new HashMap();
-                    List goalIds = entryData.containsKey("goalIds") ? ((List)entryData.get("goalIds")) : null;
-                    Object highlightMeta = (h instanceof HighlightWithMeta) ? ((HighlightWithMeta) h).getMetaData() : null;
-
-                    if (goalIds != null) {
-                        // highlight was set programatically
-                        if (highlightMeta != null 
-                            && highlightMeta instanceof Map 
-                            && ((Map)highlightMeta).containsKey("source")
-                            && "program" == ((Map)highlightMeta).get("source").toString()) {
-                            
-                            skip = false;
-                        } else if (goalIds.size() == 1) { // highlight was set by tapping and the goal was not in a group
-                            skip = false;
-                        }
-                    }
-
-                    return skip;
-                }  
-            } :
-            null;
 
         RNConditionalMarkerImage marker = new RNConditionalMarkerImage(
             chart.getContext(), 
             chart.getContext()
             .getResources()
             .getIdentifier(resourceName, "drawable", chart.getContext().getPackageName()),
-            skipNonGoal);
+            excludes);
         
         marker.setOffset(offsetX, offsetY);
         marker.setSize(new FSize(width, height));
