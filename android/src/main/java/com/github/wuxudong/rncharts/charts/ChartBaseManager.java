@@ -6,6 +6,7 @@ import android.os.Build;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.List;
 
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
@@ -32,10 +33,14 @@ import com.github.mikephil.charting.formatter.LargeValueFormatter;
 import com.github.mikephil.charting.formatter.PercentFormatter;
 import com.github.mikephil.charting.highlight.Highlight;
 import com.github.mikephil.charting.data.ChartData;
+import com.github.mikephil.charting.utils.FSize;
 import com.github.wuxudong.rncharts.data.DataExtract;
 import com.github.wuxudong.rncharts.listener.RNOnChartValueSelectedListener;
 import com.github.wuxudong.rncharts.markers.RNRectangleMarkerView;
 import com.github.wuxudong.rncharts.utils.BridgeUtils;
+import com.github.wuxudong.rncharts.markers.RNConditionalMarkerImage;
+import com.github.wuxudong.rncharts.highlight.HighlightWithMeta;
+import com.github.wuxudong.rncharts.utils.ConversionUtil;
 
 public abstract class ChartBaseManager<T extends Chart, U extends Entry> extends SimpleViewManager {
 
@@ -308,6 +313,53 @@ public abstract class ChartBaseManager<T extends Chart, U extends Entry> extends
         chart.setMarker(marker);
     }
 
+    @ReactProp(name = "imageMarker")
+    public void setImageMarker(Chart chart, ReadableMap propMap) {
+        if (!BridgeUtils.validate(propMap, ReadableType.Boolean, "enabled") || !propMap.getBoolean("enabled")) {
+            chart.setMarker(null);
+            return;
+        }
+
+        if (!BridgeUtils.validate(propMap, ReadableType.String, "resourceName")) {
+            throw new IllegalArgumentException("expecting resourceName for imageMarker");
+        }
+
+        String resourceName = propMap.getString("resourceName");
+        Float offsetX = 0f;
+        Float offsetY = 0f;
+        Float width = 0f;
+        Float height = 0f;
+        ReadableArray excludes = null;
+
+        if (BridgeUtils.validate(propMap, ReadableType.Number, "offsetX")) {
+            offsetX = (float)propMap.getDouble("offsetX");
+        }
+        if (BridgeUtils.validate(propMap, ReadableType.Number, "offsetY")) {
+            offsetY = (float)propMap.getDouble("offsetY");
+        }
+        if (BridgeUtils.validate(propMap, ReadableType.Number, "width")) {
+            width = (float)propMap.getDouble("width");
+        }
+        if (BridgeUtils.validate(propMap, ReadableType.Number, "height")) {
+            height = (float)propMap.getDouble("height");
+        }
+        if (BridgeUtils.validate(propMap, ReadableType.Array, "excludes")) {
+            excludes = propMap.getArray("excludes");
+        }
+
+        RNConditionalMarkerImage marker = new RNConditionalMarkerImage(
+            chart.getContext(), 
+            chart.getContext()
+            .getResources()
+            .getIdentifier(resourceName, "drawable", chart.getContext().getPackageName()),
+            excludes);
+        
+        marker.setOffset(offsetX, offsetY);
+        marker.setSize(new FSize(width, height));
+
+        chart.setMarker(marker);
+    }
+
     /**
      * General axis config details: https://github.com/PhilJay/MPAndroidChart/wiki/The-Axis
      */
@@ -459,10 +511,16 @@ public abstract class ChartBaseManager<T extends Chart, U extends Entry> extends
         if (chart.getData() == null) {
             mDataDependentProps.put("highlightValue", propMap);
         } else {
-            Highlight h = new Highlight(
+            Map meta = new HashMap<String, Object>();
+            meta.put("source", "program");
+            if (BridgeUtils.validate(propMap, ReadableType.Map, "meta")) {
+                meta.putAll(ConversionUtil.toMap(propMap.getMap("meta")));
+            }
+
+            HighlightWithMeta h = new HighlightWithMeta(
                 (float) propMap.getDouble("x"), 
-                Float.NaN, // y
-                propMap.getInt("dataSetIndex")
+                propMap.getInt("dataSetIndex"),
+                meta
             );
 
             // dataIndex required for CombinedChart to pin point a highlight position

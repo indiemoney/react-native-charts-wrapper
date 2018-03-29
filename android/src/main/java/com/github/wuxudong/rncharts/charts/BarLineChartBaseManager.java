@@ -112,6 +112,9 @@ public abstract class BarLineChartBaseManager<T extends BarLineChartBase, U exte
         chart.setHighlightPerDragEnabled(enabled);
     }
 
+    /**
+     * optional animationDuration or value 0 indicates no animation
+     */
     @ReactProp(name = "zoom")
     public void setZoom(BarLineChartBase chart, ReadableMap propMap) {
         if (BridgeUtils.validate(propMap, ReadableType.Number, "scaleX") &&
@@ -125,13 +128,32 @@ public abstract class BarLineChartBaseManager<T extends BarLineChartBase, U exte
                 axisDependency = YAxis.AxisDependency.RIGHT;
             }
 
-            chart.zoom(
+            Integer duration = 0;
+            if (BridgeUtils.validate(propMap, ReadableType.Number, "animationDuration")) {
+                duration = propMap.getInt("animationDuration");
+            }
+
+            if (duration == 0) {
+                chart.zoom(
                     (float) propMap.getDouble("scaleX"),
                     (float) propMap.getDouble("scaleY"),
                     (float) propMap.getDouble("xValue"),
                     (float) propMap.getDouble("yValue"),
                     axisDependency
-            );
+                );
+            } else {
+                // TODO(chenyu): use zoomAndCenterAnimated when bug fixed or branch out:
+                // https://github.com/PhilJay/MPAndroidChart/pull/2856
+                chart.centerViewToAnimated(
+                    //(float) propMap.getDouble("scaleX"),
+                    //(float) propMap.getDouble("scaleY"),
+                    (float) propMap.getDouble("xValue"),
+                    (float) propMap.getDouble("yValue"),
+                    axisDependency,
+                    duration
+                );
+            }
+            
         }
     }
 
