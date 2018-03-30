@@ -3,10 +3,6 @@ package com.github.wuxudong.rncharts.charts;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.os.Build;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.List;
 
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
@@ -24,23 +20,24 @@ import com.github.mikephil.charting.components.LegendEntry;
 import com.github.mikephil.charting.components.LimitLine;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.components.XAxis.XAxisPosition;
-import com.github.mikephil.charting.data.Entry;
-import com.github.mikephil.charting.data.CombinedData;
 import com.github.mikephil.charting.data.ChartData;
-import com.github.mikephil.charting.interfaces.datasets.IDataSet;
+import com.github.mikephil.charting.data.CombinedData;
+import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter;
 import com.github.mikephil.charting.formatter.LargeValueFormatter;
 import com.github.mikephil.charting.formatter.PercentFormatter;
-import com.github.mikephil.charting.highlight.Highlight;
-import com.github.mikephil.charting.data.ChartData;
+import com.github.mikephil.charting.interfaces.datasets.IDataSet;
 import com.github.mikephil.charting.utils.FSize;
 import com.github.wuxudong.rncharts.data.DataExtract;
-import com.github.wuxudong.rncharts.listener.RNOnChartValueSelectedListener;
+import com.github.wuxudong.rncharts.highlight.HighlightWithMeta;
+import com.github.wuxudong.rncharts.markers.RNConditionalMarkerImage;
 import com.github.wuxudong.rncharts.markers.RNRectangleMarkerView;
 import com.github.wuxudong.rncharts.utils.BridgeUtils;
-import com.github.wuxudong.rncharts.markers.RNConditionalMarkerImage;
-import com.github.wuxudong.rncharts.highlight.HighlightWithMeta;
 import com.github.wuxudong.rncharts.utils.ConversionUtil;
+
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 public abstract class ChartBaseManager<T extends Chart, U extends Entry> extends SimpleViewManager {
 
@@ -500,6 +497,72 @@ public abstract class ChartBaseManager<T extends Chart, U extends Entry> extends
             chart.invalidate();
             setDataDependentProps(chart);
         }
+    }
+
+    //TODO(chenyu): generalize
+    Entry createEntry(Context mContext, ReadableArray values, int index) {
+        float x = index;
+
+        Entry entry;
+        if (ReadableType.Map.equals(values.getType(index))) {
+            ReadableMap map = values.getMap(index);
+            if (map.hasKey("x")) {
+                x = (float) map.getDouble("x");
+            }
+
+            //Drawable drawable = getIconDrawable(mContext, map);
+            entry = new Entry(x, (float) map.getDouble("y"), //drawable, 
+                ConversionUtil.toMap(map));
+        } else if (ReadableType.Number.equals(values.getType(index))) {
+            entry = new Entry(x, (float) values.getDouble(index));
+        } else {
+            throw new IllegalArgumentException("Unexpected entry type: " + values.getType(index));
+        }
+
+        return entry;
+    }
+
+    /**
+     * update entry x and y
+     *
+     * Entry API: https://github.com/PhilJay/MPAndroidChart/wiki/Dynamic-&-Realtime-Data
+     */
+    @ReactProp(name = "updatedEntries")
+    public void setUpdatedEntries(Chart chart, ReadableArray dsArray) {
+
+        // for each dataset
+        for (int i = 0; i < dsArray.size(); i++) {
+            ReadableMap dsProp = dsArray.getMap(i);
+            // locate dataset
+            int dataIndex = dsProp.hasKey("dataIndex") ? dsProp.getInt("dataIndex") : 0;
+            int dataSetIndex = dsProp.hasKey("dataSetIndex") ? dsProp.getInt("dataSetIndex") : 0;
+
+            ChartData data =
+                    (chart.getData() instanceof CombinedData) ?
+                            ((CombinedData) chart.getData()).getAllData().get(dataIndex) :
+                            chart.getData();
+
+            IDataSet dataset = (IDataSet) data.getDataSets().get(dataSetIndex);
+
+            // apply updates
+            ReadableArray updateArray = dsProp.getArray("updates");
+            for (int j = 0; j < updateArray.size(); j++) {
+                ReadableMap entry = updateArray.getMap(j);
+                int entryIndex = entry.getInt("entryIndex");
+                Float x = entry.hasKey("x") ? (float) entry.getDouble("x") : null;
+                Float y = entry.hasKey("y") ? (float) entry.getDouble("y") : null;
+
+
+                Entry e = dataset.getEntryForIndex(entryIndex);
+
+                if (x != null) e.setX(x);
+                if (y != null) e.setY(y);
+            }
+
+            data.notifyDataChanged();
+        }
+
+        chart.invalidate();
     }
 
     /**
