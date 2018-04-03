@@ -1,29 +1,20 @@
 package com.github.wuxudong.rncharts.markers;
 
 import android.content.Context;
-import android.graphics.drawable.Drawable;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
 import android.graphics.Canvas;
 
-import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.ReadableArray;
-import com.github.mikephil.charting.charts.Chart;
 import com.github.mikephil.charting.components.MarkerImage;
-import com.github.mikephil.charting.data.CandleEntry;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.highlight.Highlight;
-import com.github.mikephil.charting.utils.MPPointF;
-import com.github.mikephil.charting.utils.Utils;
-import com.github.wuxudong.rncharts.R;
 import com.github.wuxudong.rncharts.highlight.HighlightWithMeta;
 import com.github.wuxudong.rncharts.utils.ConversionUtil;
 
-import java.util.List;
-import java.util.Set;
-import java.util.Map;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Allows skipping drawing of image marker based on conditions.
@@ -108,8 +99,8 @@ public class RNConditionalMarkerImage extends MarkerImage {
                     || !eMarkerSrc.equals(hSrc))) { 
                 mSkipDraw = true;
             }
-
         }
+
 
         super.refreshContent(e, h);
     }

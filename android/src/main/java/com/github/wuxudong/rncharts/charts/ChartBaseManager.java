@@ -21,14 +21,15 @@ import com.github.mikephil.charting.components.LimitLine;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.components.XAxis.XAxisPosition;
 import com.github.mikephil.charting.data.ChartData;
-import com.github.mikephil.charting.data.CombinedData;
 import com.github.mikephil.charting.data.Entry;
+import com.github.mikephil.charting.data.LineScatterCandleRadarDataSet;
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter;
 import com.github.mikephil.charting.formatter.LargeValueFormatter;
 import com.github.mikephil.charting.formatter.PercentFormatter;
 import com.github.mikephil.charting.interfaces.datasets.IDataSet;
 import com.github.mikephil.charting.utils.FSize;
 import com.github.wuxudong.rncharts.data.DataExtract;
+import com.github.wuxudong.rncharts.data.DatasetLocate;
 import com.github.wuxudong.rncharts.highlight.HighlightWithMeta;
 import com.github.wuxudong.rncharts.markers.RNConditionalMarkerImage;
 import com.github.wuxudong.rncharts.markers.RNRectangleMarkerView;
@@ -37,6 +38,7 @@ import com.github.wuxudong.rncharts.utils.ConversionUtil;
 
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 public abstract class ChartBaseManager<T extends Chart, U extends Entry> extends SimpleViewManager {
@@ -499,70 +501,55 @@ public abstract class ChartBaseManager<T extends Chart, U extends Entry> extends
         }
     }
 
-    //TODO(chenyu): generalize
-    Entry createEntry(Context mContext, ReadableArray values, int index) {
-        float x = index;
-
-        Entry entry;
-        if (ReadableType.Map.equals(values.getType(index))) {
-            ReadableMap map = values.getMap(index);
-            if (map.hasKey("x")) {
-                x = (float) map.getDouble("x");
-            }
-
-            //Drawable drawable = getIconDrawable(mContext, map);
-            entry = new Entry(x, (float) map.getDouble("y"), //drawable, 
-                ConversionUtil.toMap(map));
-        } else if (ReadableType.Number.equals(values.getType(index))) {
-            entry = new Entry(x, (float) values.getDouble(index));
-        } else {
-            throw new IllegalArgumentException("Unexpected entry type: " + values.getType(index));
-        }
-
-        return entry;
-    }
-
     /**
-     * update entry x and y
-     *
-     * Entry API: https://github.com/PhilJay/MPAndroidChart/wiki/Dynamic-&-Realtime-Data
+     * update dataset entries
      */
     @ReactProp(name = "updatedEntries")
-    public void setUpdatedEntries(Chart chart, ReadableArray dsArray) {
+    public void setUpdatedEntries(Chart chart, final ReadableArray dsArray) {
+        final DataExtract de = getDataExtract(chart.getContext());
 
-        // for each dataset
-        for (int i = 0; i < dsArray.size(); i++) {
-            ReadableMap dsProp = dsArray.getMap(i);
-            // locate dataset
-            int dataIndex = dsProp.hasKey("dataIndex") ? dsProp.getInt("dataIndex") : 0;
-            int dataSetIndex = dsProp.hasKey("dataSetIndex") ? dsProp.getInt("dataSetIndex") : 0;
+        new DatasetLocate() {
 
-            ChartData data =
-                    (chart.getData() instanceof CombinedData) ?
-                            ((CombinedData) chart.getData()).getAllData().get(dataIndex) :
-                            chart.getData();
+            @Override
+            protected void onLocateDataset(IDataSet dataset, ChartData data, ReadableMap dsProp) {
+                // apply updates
+                ReadableArray updateArray = dsProp.getArray("updates");
+                List<Entry> updatedEntries = de.createEntries(updateArray);
+                for (int j = 0; j < updateArray.size(); j++) {
+                    ReadableMap entry = updateArray.getMap(j);
+                    int entryIndex = entry.getInt("entryIndex");
+                    Entry e = dataset.getEntryForIndex(entryIndex);
+                    Entry newE = updatedEntries.get(j);
 
-            IDataSet dataset = (IDataSet) data.getDataSets().get(dataSetIndex);
+                    e.setX(newE.getX());
+                    e.setY(newE.getY());
+                    e.setData(newE.getData());
+                    e.setIcon(newE.getIcon());
+                }
 
-            // apply updates
-            ReadableArray updateArray = dsProp.getArray("updates");
-            for (int j = 0; j < updateArray.size(); j++) {
-                ReadableMap entry = updateArray.getMap(j);
-                int entryIndex = entry.getInt("entryIndex");
-                Float x = entry.hasKey("x") ? (float) entry.getDouble("x") : null;
-                Float y = entry.hasKey("y") ? (float) entry.getDouble("y") : null;
-
-
-                Entry e = dataset.getEntryForIndex(entryIndex);
-
-                if (x != null) e.setX(x);
-                if (y != null) e.setY(y);
+                data.notifyDataChanged();
             }
-
-            data.notifyDataChanged();
-        }
+        }.start(chart, dsArray);
 
         chart.invalidate();
+    }
+
+    @ReactProp(name = "highlightIndicators")
+    public void setHighlighIndicators(Chart chart, ReadableArray dsArray) {
+
+        new DatasetLocate() {
+
+            @Override
+            protected void onLocateDataset(IDataSet dataset, ChartData data, ReadableMap dsProp) {
+                if (!(dataset instanceof LineScatterCandleRadarDataSet))
+                    return;
+
+                ((LineScatterCandleRadarDataSet)dataset).setDrawHorizontalHighlightIndicator(
+                        dsProp.hasKey("horizontalEnabled") && dsProp.getBoolean("horizontalEnabled"));
+                ((LineScatterCandleRadarDataSet)dataset).setDrawVerticalHighlightIndicator(
+                        dsProp.hasKey("verticalEnabled") && dsProp.getBoolean("verticalEnabled"));
+            }
+        }.start(chart, dsArray);
     }
 
     /**
@@ -582,7 +569,7 @@ public abstract class ChartBaseManager<T extends Chart, U extends Entry> extends
 
             HighlightWithMeta h = new HighlightWithMeta(
                 (float) propMap.getDouble("x"), 
-                propMap.getInt("dataSetIndex"),
+                propMap.hasKey("dataSetIndex") ? propMap.getInt("dataSetIndex") : 0,
                 meta
             );
 
@@ -597,7 +584,7 @@ public abstract class ChartBaseManager<T extends Chart, U extends Entry> extends
 
             chart.highlightValue(
                 h,
-                propMap.getBoolean("callListener")
+                propMap.hasKey("callListener") ? propMap.getBoolean("callListener") : false
             );
         }
     }
@@ -614,36 +601,13 @@ public abstract class ChartBaseManager<T extends Chart, U extends Entry> extends
         if (chart.getData() == null) {
             mDataDependentProps.put("highlightEnabled", readableArray);
         } else {
-            for (int i = 0; i < readableArray.size(); i++) {
-                if (!ReadableType.Map.equals(readableArray.getType(i))) {
-                    throw new IllegalArgumentException("Expecting array of maps");
+            new DatasetLocate() {
+
+                @Override
+                protected void onLocateDataset(IDataSet dataset, ChartData data, ReadableMap dsProp) {
+                    dataset.setHighlightEnabled(dsProp.getBoolean("enabled"));
                 }
-
-                ReadableMap propMap = readableArray.getMap(i);
-                Integer dataSetIndex = null;
-                Integer dataIndex = null;
-                boolean isEnabled = propMap.getBoolean("enabled");
-
-                if (BridgeUtils.validate(propMap, ReadableType.Number, "dataSetIndex")) {
-                    dataSetIndex = propMap.getInt("dataSetIndex");
-                }
-
-                if (BridgeUtils.validate(propMap, ReadableType.Number, "dataIndex")) {
-                    dataIndex = propMap.getInt("dataIndex");
-                }
-
-                ChartData data = 
-                    (chart.getData() instanceof CombinedData) ? 
-                    ((CombinedData)chart.getData()).getAllData().get(dataIndex) : 
-                    chart.getData();
-
-                if (dataSetIndex != null) {
-                    ((IDataSet)data.getDataSets().get(dataSetIndex)).setHighlightEnabled(isEnabled);
-                } else {
-                    data.setHighlightEnabled(isEnabled);
-                }
-
-            }
+            }.start(chart, readableArray);
 
         }
     }
