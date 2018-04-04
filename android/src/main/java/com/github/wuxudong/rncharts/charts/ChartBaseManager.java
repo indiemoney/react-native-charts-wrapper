@@ -29,7 +29,7 @@ import com.github.mikephil.charting.formatter.PercentFormatter;
 import com.github.mikephil.charting.interfaces.datasets.IDataSet;
 import com.github.mikephil.charting.utils.FSize;
 import com.github.wuxudong.rncharts.data.DataExtract;
-import com.github.wuxudong.rncharts.data.DatasetLocate;
+import com.github.wuxudong.rncharts.data.DataSetLocate;
 import com.github.wuxudong.rncharts.highlight.HighlightWithMeta;
 import com.github.wuxudong.rncharts.markers.RNConditionalMarkerImage;
 import com.github.wuxudong.rncharts.markers.RNRectangleMarkerView;
@@ -508,7 +508,7 @@ public abstract class ChartBaseManager<T extends Chart, U extends Entry> extends
     public void setUpdatedEntries(Chart chart, final ReadableArray dsArray) {
         final DataExtract de = getDataExtract(chart.getContext());
 
-        new DatasetLocate() {
+        new DataSetLocate() {
 
             @Override
             protected void onLocateDataset(IDataSet dataset, ChartData data, ReadableMap dsProp) {
@@ -537,7 +537,7 @@ public abstract class ChartBaseManager<T extends Chart, U extends Entry> extends
     @ReactProp(name = "highlightIndicators")
     public void setHighlighIndicators(Chart chart, ReadableArray dsArray) {
 
-        new DatasetLocate() {
+        new DataSetLocate() {
 
             @Override
             protected void onLocateDataset(IDataSet dataset, ChartData data, ReadableMap dsProp) {
@@ -601,7 +601,7 @@ public abstract class ChartBaseManager<T extends Chart, U extends Entry> extends
         if (chart.getData() == null) {
             mDataDependentProps.put("highlightEnabled", readableArray);
         } else {
-            new DatasetLocate() {
+            new DataSetLocate() {
 
                 @Override
                 protected void onLocateDataset(IDataSet dataset, ChartData data, ReadableMap dsProp) {

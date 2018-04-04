@@ -10,7 +10,7 @@ import com.github.mikephil.charting.interfaces.datasets.IDataSet;
 /**
  * Created by idealllee on 4/3/18.
  */
-public abstract class DatasetLocate {
+public abstract class DataSetLocate {
 
     protected abstract void onLocateDataset(IDataSet dataset, ChartData data, ReadableMap dsProp);
 
