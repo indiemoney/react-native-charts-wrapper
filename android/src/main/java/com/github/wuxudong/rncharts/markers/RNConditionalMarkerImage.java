@@ -23,7 +23,7 @@ import java.util.Set;
  *  1. highlight is on a excluded dataset
  *  2. entry's markerHighlightSource does not match highligh's source
  */
-public class RNConditionalMarkerImage extends MarkerImage {
+public class RNConditionalMarkerImage extends RNImageMarker {
     
     private boolean mSkipDraw;
     /*
@@ -59,8 +59,8 @@ public class RNConditionalMarkerImage extends MarkerImage {
         return null;
     }
 
-    public RNConditionalMarkerImage(Context context, int drawableResourceId, ReadableArray excludesProp) {
-        super(context, drawableResourceId);
+    public RNConditionalMarkerImage(Context context, ReadableArray excludesProp) {
+        super(context);
         
         mSkipDraw = false;
         mExcludes = parseExcludesProp(excludesProp);
@@ -101,8 +101,7 @@ public class RNConditionalMarkerImage extends MarkerImage {
             }
         }
 
-
-        super.refreshContent(e, h);
+        if (!mSkipDraw) super.refreshContent(e, h);
     }
     
     @Override
