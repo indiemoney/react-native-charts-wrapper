@@ -319,11 +319,6 @@ public abstract class ChartBaseManager<T extends Chart, U extends Entry> extends
             return;
         }
 
-        if (!BridgeUtils.validate(propMap, ReadableType.String, "resourceName")) {
-            throw new IllegalArgumentException("expecting resourceName for imageMarker");
-        }
-
-        String resourceName = propMap.getString("resourceName");
         Float offsetX = 0f;
         Float offsetY = 0f;
         Float width = 0f;
@@ -347,10 +342,7 @@ public abstract class ChartBaseManager<T extends Chart, U extends Entry> extends
         }
 
         RNConditionalMarkerImage marker = new RNConditionalMarkerImage(
-            chart.getContext(), 
-            chart.getContext()
-            .getResources()
-            .getIdentifier(resourceName, "drawable", chart.getContext().getPackageName()),
+            chart.getContext(),
             excludes);
         
         marker.setOffset(offsetX, offsetY);
