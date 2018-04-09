@@ -18,7 +18,8 @@ import java.util.Map;
 
 /**
  * Extends com.github.mikephil.charting.components.MarkerImage to allow
- * varying drawables given data entry.
+ * varying drawables given data entry. (note: only refreshContent was updated
+ * and the rest copied from MarkerImage)
  *
  * Entries want to have their custom image marker drawn must specify
  * markerName as a valid drawable resource name.
