@@ -20,6 +20,7 @@ import android.graphics.Paint;
 import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.util.Log;
 import java.io.IOException;
 import java.io.InputStream;
@@ -88,39 +89,48 @@ public abstract class DataExtract<D extends ChartData, U extends Entry> {
 
 
     private void drawBitmap(Context context, Canvas c, ReadableMap icon) {
+        Drawable drawable = null;
         Bitmap b = null;
-        InputStream is = null;
         String path = icon.hasKey("path") ? icon.getString("path") : null;
-        if (path != null) {
-            try {
-                int color = icon.hasKey("color") ? icon.getInt("color") : Color.WHITE;
-                float size = icon.hasKey("size") ? (float) icon.getDouble("size") : 100f;
-                float offsetLeft = icon.hasKey("left") ? (float) icon.getDouble("left") : 0f;
-                float offsetTop = icon.hasKey("top") ? (float) icon.getDouble("top") : 0f;
 
-                is = context.getAssets().open(path);
-                b = BitmapFactory.decodeStream(is);
-                int ow = b.getWidth();
-                int oh = b.getHeight();
+        if (path == null) {
+            return;
+        }
 
-                Matrix m = new Matrix();
-                m.postScale(size / ow, size / oh);
-                m.postTranslate(offsetLeft, offsetTop);
+        int resId = context.getResources().getIdentifier(path, "drawable", context.getPackageName());
+        if (resId == 0) {
+            return;
+        }
 
-                Paint p = new Paint();
-                p.setAntiAlias(true);
-                p.setDither(true);
-                p.setFilterBitmap(true);
-                p.setColorFilter(new PorterDuffColorFilter(color, PorterDuff.Mode.SRC_ATOP));
-                c.drawBitmap(b, m, p);
-            } catch (IOException e) {
-                Log.e("wuxudong/react-native-charts-wrapper", "Error creating icon drawable", e);
-            } finally {
-                if (is != null) {
-                    try { is.close(); }
-                    catch (IOException e) { Log.e("wuxudong/react-native-charts-wrapper", "Error closing stream", e); } }
-                if (b != null) { b.recycle(); }
-            }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            drawable = context.getResources().getDrawable(resId, null);
+        }
+        else {
+            drawable = context.getResources().getDrawable(resId);
+        }
+
+        int color = icon.hasKey("color") ? icon.getInt("color") : Color.WHITE;
+        float size = icon.hasKey("size") ? (float) icon.getDouble("size") : 100f;
+        float offsetLeft = icon.hasKey("left") ? (float) icon.getDouble("left") : 0f;
+        float offsetTop = icon.hasKey("top") ? (float) icon.getDouble("top") : 0f;
+
+        try {
+            b = BitmapFactory.decodeResource(context.getResources(), resId);
+            int ow = b.getWidth();
+            int oh = b.getHeight();
+
+            Matrix m = new Matrix();
+            m.postScale(size / ow, size / oh);
+            m.postTranslate(offsetLeft, offsetTop);
+
+            Paint p = new Paint();
+            p.setAntiAlias(true);
+            p.setDither(true);
+            p.setFilterBitmap(true);
+            p.setColorFilter(new PorterDuffColorFilter(color, PorterDuff.Mode.SRC_ATOP));
+            c.drawBitmap(b, m, p);
+        } finally {
+            if (b != null) { b.recycle(); }
         }
     }
 
