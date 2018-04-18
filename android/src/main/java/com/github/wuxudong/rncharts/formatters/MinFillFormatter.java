@@ -8,7 +8,7 @@ import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 /**
  * Fill formatter that sets fill line to be chart min
  * 
-
+ *
  * @author jlo1 04/19/2018
  */
 public class MinFillFormatter implements IFillFormatter
