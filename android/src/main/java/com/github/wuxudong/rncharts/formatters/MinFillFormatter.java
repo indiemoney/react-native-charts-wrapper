@@ -6,7 +6,7 @@ import com.github.mikephil.charting.interfaces.dataprovider.LineDataProvider;
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 
 /**
- * Fill formatter that fills above the line instead of below.
+ * Fill formatter that sets fill line to be chart min
  * 
 
  * @author jlo1 04/19/2018
