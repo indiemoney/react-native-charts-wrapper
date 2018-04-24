@@ -12,7 +12,7 @@ import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
  *
  * See https://github.com/PhilJay/MPAndroidChart/blob/v3.0.2/MPChartLib/src/main/java/com/github/mikephil/charting/formatter/DefaultFillFormatter.java
  * and https://github.com/PhilJay/MPAndroidChart/issues/1178
-
+ *
  * @author jlo1 08/29/2017
  */
 public class ReverseFillFormatter implements IFillFormatter
