@@ -3,6 +3,7 @@ package com.github.wuxudong.rncharts.charts;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.os.Build;
+import android.util.Log;
 
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
@@ -508,17 +509,44 @@ public abstract class ChartBaseManager<T extends Chart, U extends Entry> extends
                 ReadableArray updateArray = dsProp.getArray("updates");
                 List<Entry> updatedEntries = de.createEntries(updateArray);
                 for (int j = 0; j < updateArray.size(); j++) {
-                    ReadableMap entry = updateArray.getMap(j);
-                    int entryIndex = entry.getInt("entryIndex");
-                    Entry e = dataset.getEntryForIndex(entryIndex);
+                    float x = (float) updateArray.getMap(j).getDouble("x");
                     Entry newE = updatedEntries.get(j);
-
-                    e.setX(newE.getX());
-                    e.setY(newE.getY());
-                    e.setData(newE.getData());
-                    e.setIcon(newE.getIcon());
+                    float y = newE.getY();
+                    Entry e = dataset.getEntryForXValue(x, y);
+                    if (e != null) {
+                        e.setY(y);
+                        e.setData(newE.getData());
+                        e.setIcon(newE.getIcon());
+                    } else {
+                        throw new IllegalArgumentException("Attempt to update invalid entry " + newE);
+                    }
                 }
 
+                // apply removes
+                ReadableArray removeArray = dsProp.getArray("removes");
+                for (int j = 0; j < removeArray.size(); j++) {
+                    ReadableMap entryMap = removeArray.getMap(j);
+                    float x = (float) entryMap.getDouble("x");
+                    float y = (float) entryMap.getDouble("y");
+                    
+                    Entry e = dataset.getEntryForXValue(x, y);
+                    if (!dataset.removeEntry(e)) {
+                        throw new IllegalArgumentException("Attempt to remove invalid entry " + e);
+                    }
+                }
+
+
+                // apply adds
+                ReadableArray addArray = dsProp.getArray("adds");
+                List<Entry> addedEntries = de.createEntries(addArray);
+                for (int j = 0; j < addArray.size(); j++) {
+                    Entry newE = addedEntries.get(j);
+                    if (!dataset.addEntry(newE)) {
+                        throw new IllegalArgumentException("Attempt to add invalid entry");
+                    }
+                }
+                
+                // notify changes
                 data.notifyDataChanged();
             }
         }.start(chart, dsArray);
