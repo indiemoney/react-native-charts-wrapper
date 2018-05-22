@@ -512,14 +512,15 @@ public abstract class ChartBaseManager<T extends Chart, U extends Entry> extends
                     for (int j = 0; j < updateArray.size(); j++) {
                         float x = (float) updateArray.getMap(j).getDouble("x");
                         Entry newE = updatedEntries.get(j);
-                        float y = newE.getY();
-                        Entry e = dataset.getEntryForXValue(x, y);
-                        if (e != null) {
-                            e.setY(y);
+
+                        List<Entry> entries = dataset.getEntriesForXValue(x);
+                        if (entries.isEmpty()) {
+                            throw new IllegalArgumentException("Attempt to update invalid entry at " + x);
+                        } else {
+                            Entry e = entries.get(0);
+                            e.setY(newE.getY());
                             e.setData(newE.getData());
                             e.setIcon(newE.getIcon());
-                        } else {
-                            throw new IllegalArgumentException("Attempt to update invalid entry " + newE);
                         }
                     }
                 }
@@ -530,11 +531,12 @@ public abstract class ChartBaseManager<T extends Chart, U extends Entry> extends
                     for (int j = 0; j < removeArray.size(); j++) {
                         ReadableMap entryMap = removeArray.getMap(j);
                         float x = (float) entryMap.getDouble("x");
-                        float y = (float) entryMap.getDouble("y");
-                        
-                        Entry e = dataset.getEntryForXValue(x, y);
-                        if (!dataset.removeEntry(e)) {
-                            throw new IllegalArgumentException("Attempt to remove invalid entry " + e);
+
+                        List<Entry> entries = dataset.getEntriesForXValue(x);
+                        if (entries.isEmpty()) {
+                            throw new IllegalArgumentException("Attempt to remove invalid entry at " + x);
+                        } else {
+                            dataset.removeEntry(entries.get(0));
                         }
                     }
                 }
@@ -545,11 +547,18 @@ public abstract class ChartBaseManager<T extends Chart, U extends Entry> extends
                     List<Entry> addedEntries = de.createEntries(addArray);
                     for (int j = 0; j < addArray.size(); j++) {
                         Entry newE = addedEntries.get(j);
+                        
                         if (newE == null) {
                             throw new IllegalArgumentException("Attempt to add invalid entry");
                         }
-                        
                         dataset.addEntryOrdered(newE);
+
+                        int idx = dataset.getEntryIndex(newE.getX(), Float.NaN, DataSet.Rounding.UP);
+                        if (dataset.getEntryForIndex(idx) != newE) {
+                            // Note (jessica): This is not working properly as of MPAndroidChart v3.0.3
+                            // See GH issue: https://github.com/PhilJay/MPAndroidChart/issues/4052
+                            throw new IllegalStateException("Did not properly add entry ordered");
+                        }
                     }
                 }
                 
