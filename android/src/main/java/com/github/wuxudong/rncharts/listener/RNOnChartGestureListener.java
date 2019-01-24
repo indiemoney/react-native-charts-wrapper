@@ -1,83 +1,138 @@
 package com.github.wuxudong.rncharts.listener;
 
+import android.support.annotation.NonNull;
+import android.util.Log;
+import android.view.MotionEvent;
+
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.bridge.WritableMap;
-import com.facebook.react.bridge.WritableNativeMap;
 import com.facebook.react.uimanager.events.RCTEventEmitter;
+import com.github.mikephil.charting.charts.BarLineChartBase;
 import com.github.mikephil.charting.charts.Chart;
-import com.github.mikephil.charting.listener.OnChartGestureListener;
+import com.github.mikephil.charting.components.YAxis;
+import com.github.mikephil.charting.listener.BarLineChartTouchListener;
 import com.github.mikephil.charting.listener.ChartTouchListener;
+import com.github.mikephil.charting.listener.OnChartGestureListener;
+import com.github.mikephil.charting.utils.MPPointD;
+import com.github.mikephil.charting.utils.MPPointF;
+import com.github.mikephil.charting.utils.ViewPortHandler;
+import com.github.wuxudong.rncharts.charts.ChartGroupHolder;
 
-import android.view.MotionEvent;
 import java.lang.ref.WeakReference;
 
 /**
- * Created by jlo1 on 08/08/2017
+ * Created by xudong on 07/03/2017.
  */
-
 public class RNOnChartGestureListener implements OnChartGestureListener {
 
     private WeakReference<Chart> mWeakChart;
 
+    private String group = null;
+
+    private String identifier = null;
+
     public RNOnChartGestureListener(Chart chart) {
-        mWeakChart = new WeakReference<>(chart);
+        this.mWeakChart = new WeakReference<>(chart);
     }
 
-    private static WritableMap viewPortToWritableMap(Chart chart, String eventName, MotionEvent me) {
-        WritableMap map = new WritableNativeMap();
-        map.putString("eventName", eventName);
-        map.putDouble("transX", chart.getViewPortHandler().getTransX());
-        map.putDouble("transY", chart.getViewPortHandler().getTransY());
-        map.putDouble("scaleX", chart.getViewPortHandler().getScaleX());
-        map.putDouble("scaleY", chart.getViewPortHandler().getScaleY());
-        map.putDouble("chartWidth", chart.getViewPortHandler().getChartWidth());
-        map.putDouble("chartHeight", chart.getViewPortHandler().getChartHeight());
-        map.putDouble("touchX", me.getX());
-        map.putDouble("touchY", me.getY());
-
-        return map;
+    public void setGroup(String group) {
+        this.group = group;
     }
 
-    private void handleEvent(String eventName, MotionEvent me) {
-        if (mWeakChart != null) {
-            Chart chart = mWeakChart.get();
-
-            ReactContext reactContext = (ReactContext) chart.getContext();
-            reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(
-                    chart.getId(),
-                    "topMessage",
-                    viewPortToWritableMap(chart, eventName, me));
-        }
+    public void setIdentifier(String identifier) {
+        this.identifier = identifier;
     }
 
     @Override
     public void onChartGestureStart(MotionEvent me, ChartTouchListener.ChartGesture lastPerformedGesture) {
-        handleEvent("onGestureStart", me);
+        sendEvent("gestureStarted", me);
     }
 
     @Override
     public void onChartGestureEnd(MotionEvent me, ChartTouchListener.ChartGesture lastPerformedGesture) {
-        handleEvent("onGestureEnd", me);
+        sendEvent("gestureEnded", me);
     }
 
-    
     @Override
-    public void onChartLongPressed(MotionEvent me) { handleEvent("onLongPressed", me); }
+    public void onChartLongPressed(MotionEvent me) {
+        sendEvent("longPressed", me);
+    }
 
     @Override
-    public void onChartDoubleTapped(MotionEvent me) { handleEvent("onDoubleTapped", me); }
+    public void onChartDoubleTapped(MotionEvent me) {
+        sendEvent("doubleTapped", me);
+    }
 
     @Override
-    public void onChartSingleTapped(MotionEvent me) { handleEvent("onSingleTapped", me); }
+    public void onChartSingleTapped(MotionEvent me) {
+        sendEvent("singleTapped", me);
+    }
 
     @Override
-    public void onChartFling(MotionEvent me1, MotionEvent me2, float velocityX, float velocityY) { handleEvent("onFling", me1); }
+    public void onChartFling(MotionEvent me1, MotionEvent me2, float velocityX, float velocityY) {
+        sendEvent("chartFlung", me1);
+    }
 
     @Override
-    public void onChartScale(MotionEvent me, float scaleX, float scaleY) { handleEvent("onScale", me); }
+    public void onChartScale(MotionEvent me, float scaleX, float scaleY) {
+        sendEvent("chartScaled", me);
+    }
 
     @Override
-    public void onChartTranslate(MotionEvent me, float dX, float dY) { handleEvent("onTranslate", me); }
+    public void onChartTranslate(MotionEvent me, float dX, float dY) {
+        sendEvent("chartTranslated", me);
+    }
 
+    private void sendEvent(String action, MotionEvent me) {
+        Chart chart = mWeakChart.get();
+        if (chart != null) {
+
+            WritableMap event = getEvent(action, me, chart);
+
+            ReactContext reactContext = (ReactContext) chart.getContext();
+            reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(
+                    chart.getId(),
+                    "topChange",
+                    event);
+        }
+    }
+
+    @NonNull
+    private WritableMap getEvent(String action, MotionEvent me, Chart chart) {
+        WritableMap event = Arguments.createMap();
+
+        event.putString("action", action);
+
+        if (chart instanceof BarLineChartBase) {
+            BarLineChartBase barLineChart = (BarLineChartBase) chart;
+            ViewPortHandler viewPortHandler = chart.getViewPortHandler();
+            event.putDouble("scaleX", chart.getScaleX());
+            event.putDouble("scaleY", chart.getScaleY());
+            event.putDouble("transX", viewPortHandler.getTransX());
+            event.putDouble("transY", viewPortHandler.getTransY());
+            event.putDouble("chartWidth", viewPortHandler.getChartWidth());
+            event.putDouble("chartHeight", viewPortHandler.getChartHeight());
+            event.putDouble("touchX", me.getX());
+            event.putDouble("touchY", me.getY());
+
+            MPPointD center = ((BarLineChartBase) chart).getValuesByTouchPoint(viewPortHandler.getContentCenter().getX(), viewPortHandler.getContentCenter().getY(), YAxis.AxisDependency.LEFT);
+            event.putDouble("centerX", center.x);
+            event.putDouble("centerY", center.y);
+
+            MPPointD leftBottom = ((BarLineChartBase) chart).getValuesByTouchPoint(viewPortHandler.contentLeft(), viewPortHandler.contentBottom(), YAxis.AxisDependency.LEFT);
+            MPPointD rightTop = ((BarLineChartBase) chart).getValuesByTouchPoint(viewPortHandler.contentRight(), viewPortHandler.contentTop(), YAxis.AxisDependency.LEFT);
+
+            event.putDouble("left", leftBottom.x);
+            event.putDouble("bottom", leftBottom.y);
+            event.putDouble("right", rightTop.x);
+            event.putDouble("top", rightTop.y);
+
+            if (group != null && identifier != null) {
+                ChartGroupHolder.sync(group, identifier, chart.getScaleX(), chart.getScaleY(), (float) center.x, (float) center.y);
+
+            }
+        }
+        return event;
+    }
 }

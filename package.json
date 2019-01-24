@@ -4,7 +4,7 @@
     "type": "git",
     "url": "https://github.com/indiemoney/react-native-charts-wrapper"
   },
-  "version": "0.2.13-SNAPSHOT.15",
+  "version": "0.5.0-SNAPSHOT.1",
   "description": "Fork off of react-native-charts-wrapper",
   "author": "wuxudong",
   "license": "MIT",
@@ -17,5 +17,9 @@
     "MPAndroidChart",
     "ios",
     "Charts"
-  ]
+  ],
+  "dependencies": {
+    "prop-types": "^15.5.10",
+    "react": "16.1.1"
+  }
 }

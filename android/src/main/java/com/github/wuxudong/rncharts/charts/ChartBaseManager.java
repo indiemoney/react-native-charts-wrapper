@@ -15,7 +15,6 @@ import com.github.mikephil.charting.components.AxisBase;
 import com.github.mikephil.charting.components.Description;
 import com.github.mikephil.charting.components.Legend;
 import com.github.mikephil.charting.components.Legend.LegendForm;
-import com.github.mikephil.charting.components.Legend.LegendPosition;
 import com.github.mikephil.charting.components.LegendEntry;
 import com.github.mikephil.charting.components.LimitLine;
 import com.github.mikephil.charting.components.XAxis;
@@ -26,23 +25,30 @@ import com.github.mikephil.charting.data.LineScatterCandleRadarDataSet;
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter;
 import com.github.mikephil.charting.formatter.LargeValueFormatter;
 import com.github.mikephil.charting.formatter.PercentFormatter;
+import com.github.mikephil.charting.highlight.Highlight;
+import com.github.wuxudong.rncharts.data.DataExtract;
+import com.github.wuxudong.rncharts.markers.RNRectangleMarkerView;
+import com.github.wuxudong.rncharts.utils.BridgeUtils;
+import com.github.wuxudong.rncharts.utils.TypefaceUtils;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+import java.util.concurrent.TimeUnit;
+
 import com.github.mikephil.charting.interfaces.datasets.IDataSet;
 import com.github.mikephil.charting.utils.FSize;
-import com.github.wuxudong.rncharts.data.DataExtract;
 import com.github.wuxudong.rncharts.data.DataSetLocate;
 import com.github.wuxudong.rncharts.highlight.HighlightWithMeta;
 import com.github.wuxudong.rncharts.markers.RNConditionalMarkerImage;
-import com.github.wuxudong.rncharts.markers.RNRectangleMarkerView;
-import com.github.wuxudong.rncharts.utils.BridgeUtils;
 import com.github.wuxudong.rncharts.utils.ConversionUtil;
 
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 
-public abstract class ChartBaseManager<T extends Chart, U extends Entry> extends SimpleViewManager {
-
+public abstract class ChartBaseManager<T extends Chart, U extends Entry> extends SimpleViewManager<T> {
+    
     /**
      * Stores props that can only be set after chart data is set. 
      * Key is the prop name and value is the ReadableMap or ReadableArray passed in from js.
@@ -51,6 +57,16 @@ public abstract class ChartBaseManager<T extends Chart, U extends Entry> extends
      * are called (e.g may not be the same order props are specified).
      */
     private Map<String, Object> mDataDependentProps = new HashMap<String, Object>();
+
+    protected static final int MOVE_VIEW_TO = 1;
+    protected static final int MOVE_VIEW_TO_X = 2;
+    protected static final int MOVE_VIEW_TO_ANIMATED = 3;
+    protected static final int CENTER_VIEW_TO = 4;
+    protected static final int CENTER_VIEW_TO_ANIMATED = 6;
+    protected static final int FIT_SCREEN = 7;
+    protected static final int HIGHLIGHTS = 8;
+
+    protected static final int SET_DATA_AND_LOCK_INDEX = 9;
 
     /**
      * Sets the data dependent props stored in mDataDependentProps. 
@@ -111,11 +127,32 @@ public abstract class ChartBaseManager<T extends Chart, U extends Entry> extends
         }
 
         // Customizing
-        if (BridgeUtils.validate(propMap, ReadableType.String, "position")) {
-            legend.setPosition(LegendPosition.valueOf(propMap.getString("position").toUpperCase()));
+        if (BridgeUtils.validate(propMap, ReadableType.String, "horizontalAlignment")) {
+            legend.setHorizontalAlignment(Legend.LegendHorizontalAlignment.valueOf(propMap.getString("horizontalAlignment").toUpperCase(Locale.ENGLISH)));
         }
+
+        if (BridgeUtils.validate(propMap, ReadableType.String, "verticalAlignment")) {
+            legend.setVerticalAlignment(Legend.LegendVerticalAlignment.valueOf(propMap.getString("verticalAlignment").toUpperCase(Locale.ENGLISH)));
+        }
+
+        if (BridgeUtils.validate(propMap, ReadableType.String, "orientation")) {
+            legend.setOrientation(Legend.LegendOrientation.valueOf(propMap.getString("orientation").toUpperCase(Locale.ENGLISH)));
+        }
+
+        if (BridgeUtils.validate(propMap, ReadableType.Boolean, "drawInside")) {
+            legend.setDrawInside(propMap.getBoolean("drawInside"));
+        }
+
+        if (BridgeUtils.validate(propMap, ReadableType.String, "direction")) {
+            legend.setDirection(Legend.LegendDirection.valueOf(propMap.getString("direction").toUpperCase(Locale.ENGLISH)));
+        }
+
+        if (BridgeUtils.validate(propMap, ReadableType.String, "fontFamily")) {
+            legend.setTypeface(TypefaceUtils.getTypeface(chart, propMap));
+        }
+
         if (BridgeUtils.validate(propMap, ReadableType.String, "form")) {
-            legend.setForm(LegendForm.valueOf(propMap.getString("form").toUpperCase()));
+            legend.setForm(LegendForm.valueOf(propMap.getString("form").toUpperCase(Locale.ENGLISH)));
         }
         if (BridgeUtils.validate(propMap, ReadableType.Number, "formSize")) {
             legend.setFormSize((float) propMap.getDouble("formSize"));
@@ -159,8 +196,6 @@ public abstract class ChartBaseManager<T extends Chart, U extends Entry> extends
 
         // TODO resetCustom function
         // TODO extra
-
-        chart.invalidate();     // TODO is this necessary? Looks like enabled is not refreshing without it
     }
 
     @ReactProp(name = "logEnabled")
@@ -171,6 +206,11 @@ public abstract class ChartBaseManager<T extends Chart, U extends Entry> extends
     @ReactProp(name = "chartBackgroundColor")
     public void setChartBackgroundColor(Chart chart, Integer color) {
         chart.setBackgroundColor(color);
+    }
+
+    @ReactProp(name = "highlightPerTapEnabled")
+    public void setHighlightPerTapEnabled(Chart chart, boolean enabled) {
+        chart.setHighlightPerTapEnabled(enabled);
     }
 
     @ReactProp(name = "chartDescription")
@@ -213,11 +253,6 @@ public abstract class ChartBaseManager<T extends Chart, U extends Entry> extends
     @ReactProp(name = "dragDecelerationFrictionCoef")
     public void setDragDecelerationFrictionCoef(Chart chart, float coef) {
         chart.setDragDecelerationFrictionCoef(coef);
-    }
-
-    @ReactProp(name = "highlightPerTapEnabled")
-    public void setHighlightPerTapEnabled(Chart chart, boolean enabled) {
-        chart.setHighlightPerTapEnabled(enabled);
     }
 
     @ReactProp(name = "maxHighlightDistance")
@@ -282,6 +317,10 @@ public abstract class ChartBaseManager<T extends Chart, U extends Entry> extends
         if (BridgeUtils.validate(propMap, ReadableType.String, "position")) {
             axis.setPosition(XAxisPosition.valueOf(propMap.getString("position")));
         }
+        if (BridgeUtils.validate(propMap, ReadableType.Number, "yOffset")) {
+            axis.setYOffset((float)(propMap.getDouble("yOffset")));
+        }
+
     }
 
     @ReactProp(name = "marker")
@@ -300,6 +339,10 @@ public abstract class ChartBaseManager<T extends Chart, U extends Entry> extends
                     .setBackgroundTintList(
                             ColorStateList.valueOf(propMap.getInt("markerColor"))
                     );
+        }
+
+        if (BridgeUtils.validate(propMap, ReadableType.Number, "digits")) {
+            marker.setDigits(propMap.getInt("digits"));
         }
 
         if (BridgeUtils.validate(propMap, ReadableType.Number, "textColor")) {
@@ -376,6 +419,9 @@ public abstract class ChartBaseManager<T extends Chart, U extends Entry> extends
         if (BridgeUtils.validate(propMap, ReadableType.Number, "textSize")) {
             axis.setTextSize((float) propMap.getDouble("textSize"));
         }
+        if (BridgeUtils.validate(propMap, ReadableType.String, "fontFamily")) {
+            axis.setTypeface(TypefaceUtils.getTypeface(chart, propMap));
+        }
         if (BridgeUtils.validate(propMap, ReadableType.Number, "gridColor")) {
             axis.setGridColor(propMap.getInt("gridColor"));
         }
@@ -411,6 +457,7 @@ public abstract class ChartBaseManager<T extends Chart, U extends Entry> extends
         if (BridgeUtils.validate(propMap, ReadableType.Array, "limitLines")) {
             ReadableArray limitLines = propMap.getArray("limitLines");
 
+            axis.removeAllLimitLines();
             for (int i = 0; i < limitLines.size(); i++) {
                 if (!ReadableType.Map.equals(limitLines.getType(i))) {
                     continue;
@@ -428,6 +475,25 @@ public abstract class ChartBaseManager<T extends Chart, U extends Entry> extends
                     }
                     if (BridgeUtils.validate(limitLineMap, ReadableType.Number, "lineWidth")) {
                         limitLine.setLineWidth((float) limitLineMap.getDouble("lineWidth"));
+                    }
+
+                    if (BridgeUtils.validate(limitLineMap, ReadableType.Number, "valueTextColor")) {
+                        limitLine.setTextColor(limitLineMap.getInt("valueTextColor"));
+                    }
+                    if (BridgeUtils.validate(limitLineMap, ReadableType.Number, "valueFont")) {
+                        limitLine.setTextSize(limitLineMap.getInt("valueFont"));
+                    }
+                    if (BridgeUtils.validate(limitLineMap, ReadableType.String, "labelPosition")) {
+                        limitLine.setLabelPosition(LimitLine.LimitLabelPosition.valueOf(limitLineMap.getString("labelPosition")));
+                    }
+                    if (BridgeUtils.validate(limitLineMap, ReadableType.Number, "lineDashPhase")
+                            && BridgeUtils.validate(limitLineMap, ReadableType.Array, "lineDashLengths")) {
+                        if (limitLineMap.getArray("lineDashLengths").size() > 1) {
+                            float lineDashPhase = (float) limitLineMap.getDouble("lineDashPhase");
+                            float lineLength = limitLineMap.getArray("lineDashLengths").getInt(0);
+                            float spaceLength = limitLineMap.getArray("lineDashLengths").getInt(1);
+                            limitLine.enableDashedLine(lineLength, spaceLength, lineDashPhase);
+                        }
                     }
 
                     axis.addLimitLine(limitLine);
@@ -467,6 +533,20 @@ public abstract class ChartBaseManager<T extends Chart, U extends Entry> extends
                 axis.setValueFormatter(new LargeValueFormatter());
             } else if ("percent".equals(valueFormatter)) {
                 axis.setValueFormatter(new PercentFormatter());
+            } else if ("date".equals(valueFormatter)) {
+                String valueFormatterPattern = propMap.getString("valueFormatterPattern");
+
+                long since = 0;
+                if (BridgeUtils.validate(propMap, ReadableType.Number, "since")) {
+                    since = (long) propMap.getDouble("since");
+                }
+
+                TimeUnit timeUnit = TimeUnit.MILLISECONDS;
+
+                if (BridgeUtils.validate(propMap, ReadableType.String, "timeUnit")) {
+                    timeUnit = TimeUnit.valueOf(propMap.getString("timeUnit").toUpperCase());
+                }
+                axis.setValueFormatter(new DateFormatter(valueFormatterPattern, since, timeUnit));
             } else {
                 axis.setValueFormatter(new CustomFormatter(valueFormatter));
             }
@@ -479,18 +559,67 @@ public abstract class ChartBaseManager<T extends Chart, U extends Entry> extends
         }
     }
 
+
+
     /**
      * Dataset config details: https://github.com/PhilJay/MPAndroidChart/wiki/DataSet-classes-in-detail
      */
     @ReactProp(name = "data")
     public void setData(Chart chart, ReadableMap propMap) {
-        ChartData data = getDataExtract(chart.getContext()).extract(propMap);
+        ChartData data = getDataExtract(chart.getContext()).extract(chart, propMap);
         // data maybe null when the prop is removed temporarily from js side
         if (data != null) {
             chart.setData(data);
             chart.invalidate();
             setDataDependentProps(chart);
         }
+    }
+
+        @ReactProp(name = "highlights")
+    public void setHighlights(T chart, ReadableArray array) {
+        List<Highlight> highlights = new ArrayList<>();
+
+        for (int i = 0; i < array.size(); i++) {
+            if (!ReadableType.Map.equals(array.getType(i))) {
+                continue;
+            }
+
+            ReadableMap highlightMap = array.getMap(i);
+
+            if (BridgeUtils.validate(highlightMap, ReadableType.Number, "x")) {
+
+                int dataSetIndex = BridgeUtils.validate(highlightMap, ReadableType.Number, "dataSetIndex") ? highlightMap.getInt("dataSetIndex") : 0;
+
+                float y = BridgeUtils.validate(highlightMap, ReadableType.Number, "y") ? (float) highlightMap.getDouble("y") : 0;
+
+                Highlight e = null;
+                if (BridgeUtils.validate(highlightMap, ReadableType.Number, "stackIndex")) {
+                    e = new Highlight((float) highlightMap.getDouble("x"), dataSetIndex, highlightMap.getInt("stackIndex"));
+                } else {
+                    e = new Highlight((float) highlightMap.getDouble("x"), y, dataSetIndex);
+                }
+
+                if (BridgeUtils.validate(highlightMap, ReadableType.Number, "dataIndex")) {
+                    e.setDataIndex(highlightMap.getInt("dataIndex"));
+                }
+
+                highlights.add(e);
+            }
+        }
+
+        chart.highlightValues(highlights.toArray(new Highlight[highlights.size()]));
+    }
+
+    protected void onAfterDataSetChanged(T chart) {
+
+    }
+
+    @Override
+    protected void onAfterUpdateTransaction(T chart) {
+        super.onAfterUpdateTransaction(chart);
+        chart.notifyDataSetChanged();
+        onAfterDataSetChanged(chart);
+        chart.postInvalidate();;
     }
 
     /**
@@ -602,6 +731,7 @@ public abstract class ChartBaseManager<T extends Chart, U extends Entry> extends
             }.start(chart, readableArray);
 
         }
+
     }
 
 }

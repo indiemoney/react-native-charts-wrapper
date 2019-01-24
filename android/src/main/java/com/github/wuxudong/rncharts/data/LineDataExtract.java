@@ -3,6 +3,7 @@ package com.github.wuxudong.rncharts.data;
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.ReadableType;
+import com.github.mikephil.charting.charts.Chart;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
@@ -20,7 +21,6 @@ import java.util.ArrayList;
 /**
  * Created by xudong on 02/03/2017.
  */
-
 public class LineDataExtract extends DataExtract<LineData, Entry> {
     private Context mContext;
 
@@ -43,10 +43,10 @@ public class LineDataExtract extends DataExtract<LineData, Entry> {
     }
 
     @Override
-    void dataSetConfig(IDataSet<Entry> dataSet, ReadableMap config) {
+    void dataSetConfig(Chart chart, IDataSet<Entry> dataSet, ReadableMap config) {
         LineDataSet lineDataSet = (LineDataSet) dataSet;
 
-        ChartDataSetConfigUtils.commonConfig(lineDataSet, config);
+        ChartDataSetConfigUtils.commonConfig(chart, lineDataSet, config);
         ChartDataSetConfigUtils.commonBarLineScatterCandleBubbleConfig(lineDataSet, config);
         ChartDataSetConfigUtils.commonLineScatterCandleRadarConfig(lineDataSet, config);
         ChartDataSetConfigUtils.commonLineRadarConfig(lineDataSet, config);

@@ -4,8 +4,10 @@ import {
   StyleSheet,
   Text,
   View,
-  processColor
+  processColor,
 } from 'react-native';
+
+import {StackNavigator, SafeAreaView} from 'react-navigation';
 
 import {PieChart} from 'react-native-indie-charts-wrapper';
 
@@ -17,14 +19,17 @@ class PieChartScreen extends React.Component {
     this.state = {
       legend: {
         enabled: true,
-        textSize: 8,
+        textSize: 15,
         form: 'CIRCLE',
-        position: 'RIGHT_OF_CHART',
+
+        horizontalAlignment: "RIGHT",
+        verticalAlignment: "CENTER",
+        orientation: "VERTICAL",
         wordWrapEnabled: true
       },
       data: {
         dataSets: [{
-          values: [{value: 40, label: 'Sandwiches'},
+          values: [{value: 45, label: 'Sandwiches'},
             {value: 21, label: 'Salads'},
             {value: 15, label: 'Soup'},
             {value: 9, label: 'Beverages'},
@@ -35,10 +40,16 @@ class PieChartScreen extends React.Component {
             valueTextSize: 20,
             valueTextColor: processColor('green'),
             sliceSpace: 5,
-            selectionShift: 13
+            selectionShift: 13,
+            // xValuePosition: "OUTSIDE_SLICE",
+            // yValuePosition: "OUTSIDE_SLICE",
+            valueFormatter: "#.#'%'",
+            valueLineColor: processColor('green'),
+            valueLinePart1Length: 0.5
           }
         }],
       },
+      highlights: [{x:2}],
       description: {
         text: 'This is Pie chart description',
         textSize: 15,
@@ -55,15 +66,15 @@ class PieChartScreen extends React.Component {
     } else {
       this.setState({...this.state, selectedEntry: JSON.stringify(entry)})
     }
+
+    console.log(event.nativeEvent)
   }
 
   render() {
     return (
-
-      <View style={{flex: 1}}>
-
-        <View style={{height:80}}>
-          <Text> selected entry</Text>
+      <SafeAreaView style={{flex: 1}}>
+        <View>
+          <Text>selected:</Text>
           <Text> {this.state.selectedEntry}</Text>
         </View>
 
@@ -75,15 +86,16 @@ class PieChartScreen extends React.Component {
             chartDescription={this.state.description}
             data={this.state.data}
             legend={this.state.legend}
+            highlights={this.state.highlights}
 
-            entryLabelColor = {processColor('black')}
-            entryLabelTextSize = {20}                 
+            entryLabelColor={processColor('green')}
+            entryLabelTextSize={20}
+            drawEntryLabels={true}
 
-
-            rotationEnabled={false}
-            drawSliceText={true}
-            usePercentValues={false}
-            centerText={'Pie center text!'}
+            rotationEnabled={true}
+            rotationAngle={45}
+            usePercentValues={true}
+            styledCenterText={{text:'Pie center text!', color: processColor('pink'), size: 20}}
             centerTextRadiusPercent={100}
             holeRadius={40}
             holeColor={processColor('#f0f0f0')}
@@ -91,10 +103,10 @@ class PieChartScreen extends React.Component {
             transparentCircleColor={processColor('#f0f0f088')}
             maxAngle={350}
             onSelect={this.handleSelect.bind(this)}
+            onChange={(event) => console.log(event.nativeEvent)}
           />
         </View>
-
-      </View>
+      </SafeAreaView>
     );
   }
 }
@@ -109,3 +121,4 @@ const styles = StyleSheet.create({
 });
 
 export default PieChartScreen;
+
