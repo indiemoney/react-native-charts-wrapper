@@ -12,13 +12,26 @@ import SwiftyJSON
 
 // In react native, because object-c is unaware of swift protocol extension. use baseClass as workaround
 
+@objcMembers
 open class RNChartViewBase: UIView, ChartViewDelegate {
     open var onSelect:RCTBubblingEventBlock?
+    
+    open var onChange:RCTBubblingEventBlock?
+    
+    private var group: String?
+    
+    private  var identifier: String?
+    
+    private  var syncX = true
+    
+    private  var syncY = false
     
     override open func reactSetFrame(_ frame: CGRect)
     {
         super.reactSetFrame(frame);
-        chart.reactSetFrame(frame);
+        
+        let chartFrame = CGRect(x: 0, y: 0, width: frame.width, height: frame.height)
+        chart.reactSetFrame(chartFrame)
     }
     
     var chart: ChartViewBase {
@@ -49,7 +62,7 @@ open class RNChartViewBase: UIView, ChartViewDelegate {
         }
         
         if json["textSize"].number != nil {
-            legend.font = legend.font.withSize(CGFloat(json["textSize"].numberValue))
+            legend.font = legend.font.withSize(CGFloat(truncating: json["textSize"].numberValue))
         }
         
         // Wrapping / clipping avoidance
@@ -58,32 +71,51 @@ open class RNChartViewBase: UIView, ChartViewDelegate {
         }
         
         if json["maxSizePercent"].number != nil {
-            legend.maxSizePercent = CGFloat(json["maxSizePercent"].numberValue)
+            legend.maxSizePercent = CGFloat(truncating: json["maxSizePercent"].numberValue)
         }
         
-        if json["position"].string != nil {
-            legend.position = BridgeUtils.parseLegendPosition(json["position"].stringValue)
+        if json["horizontalAlignment"].string != nil {
+            legend.horizontalAlignment = BridgeUtils.parseLegendHorizontalAlignment(json["horizontalAlignment"].stringValue)
         }
         
+        if json["verticalAlignment"].string != nil {
+            legend.verticalAlignment = BridgeUtils.parseLegendVerticalAlignment(json["verticalAlignment"].stringValue)
+        }
+        
+        if json["orientation"].string != nil {
+            legend.orientation = BridgeUtils.parseLegendOrientation(json["orientation"].stringValue)
+        }
+        
+        if json["drawInside"].bool != nil {
+            legend.drawInside = json["drawInside"].boolValue
+        }
+        
+        if json["direction"].string != nil {
+            legend.direction = BridgeUtils.parseLegendDirection(json["direction"].stringValue)
+        }
+                
+        if let font = FontUtils.getFont(json) {
+            legend.font = font
+        }
         
         if json["form"].string != nil {
             legend.form = BridgeUtils.parseLegendForm(json["form"].stringValue)
         }
         
         if json["formSize"].number != nil {
-            legend.formSize = CGFloat(json["formSize"].numberValue)
+            legend.formSize = CGFloat(truncating: json["formSize"].numberValue)
         }
         
         if json["xEntrySpace"].number != nil {
-            legend.xEntrySpace = CGFloat(json["xEntrySpace"].numberValue)
+            legend.xEntrySpace = CGFloat(truncating: json["xEntrySpace"].numberValue)
         }
         
         if json["yEntrySpace"].number != nil {
-            legend.yEntrySpace = CGFloat(json["yEntrySpace"].numberValue)
+            legend.yEntrySpace = CGFloat(truncating: json["yEntrySpace"].numberValue)
         }
         
         if json["formToTextSpace"].number != nil {
-            legend.formToTextSpace = CGFloat(json["formToTextSpace"].numberValue)
+            legend.formToTextSpace = CGFloat(truncating: json["formToTextSpace"].numberValue)
         }
         
         
@@ -99,7 +131,17 @@ open class RNChartViewBase: UIView, ChartViewDelegate {
                     // TODO null label should start a group
                     // TODO -2 color should avoid drawing a form
                     
-                    legend.setCustom(colors: BridgeUtils.parseColors(colorsArray), labels: labelsArray.map({ return $0.stringValue }))
+                    var legendEntries = [LegendEntry]();
+                    
+                    for i in 0..<labelsArray.count {
+                        let legendEntry = LegendEntry()
+                        legendEntry.formColor =  RCTConvert.uiColor(colorsArray[i].intValue);
+                        legendEntry.label = labelsArray[i].stringValue;
+                        
+                        legendEntries.append(legendEntry)
+                    }
+                    
+                    legend.setCustom(entries: legendEntries)
                 }
             }
         }
@@ -131,7 +173,7 @@ open class RNChartViewBase: UIView, ChartViewDelegate {
         
         
         if json["positionX"].number != nil && json["positionY"].number != nil {
-            chartDescription.position = CGPoint(x: CGFloat(json["positionX"].numberValue), y: CGFloat(json["positionY"].numberValue))
+            chartDescription.position = CGPoint(x: CGFloat(truncating: json["positionX"].numberValue), y: CGFloat(truncating: json["positionY"].numberValue))
         }
         
         chart.chartDescription = chartDescription
@@ -145,12 +187,16 @@ open class RNChartViewBase: UIView, ChartViewDelegate {
         chart.isUserInteractionEnabled = touchEnabled
     }
     
+    func setHighlightPerTapEnabled(_ enabled: Bool) {
+        chart.highlightPerTapEnabled = enabled
+    }
+    
     func setDragDecelerationEnabled(_ dragDecelerationEnabled: Bool) {
         chart.dragDecelerationEnabled = dragDecelerationEnabled
     }
     
     func setDragDecelerationFrictionCoef(_ dragDecelerationFrictionCoef: NSNumber) {
-        chart.dragDecelerationFrictionCoef = CGFloat(dragDecelerationFrictionCoef)
+        chart.dragDecelerationFrictionCoef = CGFloat(truncating: dragDecelerationFrictionCoef)
     }
     
     func setAnimation(_ config: NSDictionary) {
@@ -189,7 +235,7 @@ open class RNChartViewBase: UIView, ChartViewDelegate {
         setCommonAxisConfig(xAxis, config: json)
         
         if json["labelRotationAngle"].number != nil {
-            xAxis.labelRotationAngle = CGFloat(json["labelRotationAngle"].numberValue)
+            xAxis.labelRotationAngle = CGFloat(truncating: json["labelRotationAngle"].numberValue)
         }
         
         if json["avoidFirstLastClipping"].bool != nil {
@@ -198,6 +244,10 @@ open class RNChartViewBase: UIView, ChartViewDelegate {
         
         if json["position"].string != nil {
             xAxis.labelPosition = BridgeUtils.parseXAxisLabelPosition(json["position"].stringValue)
+        }
+
+        if json["yOffset"].number != nil {
+            xAxis.yOffset = CGFloat(truncating: json["yOffset"].numberValue)
         }
     }
     
@@ -221,6 +271,10 @@ open class RNChartViewBase: UIView, ChartViewDelegate {
         }
         
         // style
+        if let font = FontUtils.getFont(config) {
+            axis.labelFont  = font
+        }
+        
         if config["textColor"].int != nil {
             axis.labelTextColor = RCTConvert.uiColor(config["textColor"].intValue)
         }
@@ -234,7 +288,7 @@ open class RNChartViewBase: UIView, ChartViewDelegate {
         }
         
         if config["gridLineWidth"].number != nil {
-            axis.gridLineWidth = CGFloat(config["gridLineWidth"].numberValue)
+            axis.gridLineWidth = CGFloat(truncating: config["gridLineWidth"].numberValue)
         }
         
         if config["axisLineColor"].int != nil {
@@ -242,7 +296,7 @@ open class RNChartViewBase: UIView, ChartViewDelegate {
         }
         
         if config["axisLineWidth"].number != nil {
-            axis.axisLineWidth = CGFloat(config["axisLineWidth"].numberValue)
+            axis.axisLineWidth = CGFloat(truncating: config["axisLineWidth"].numberValue)
         }
         
         if config["gridDashedLine"].exists() {
@@ -252,15 +306,15 @@ open class RNChartViewBase: UIView, ChartViewDelegate {
             var spaceLength = CGFloat(0)
             
             if gridDashedLine["lineLength"].number != nil {
-                lineLength = CGFloat(gridDashedLine["lineLength"].numberValue)
+                lineLength = CGFloat(truncating: gridDashedLine["lineLength"].numberValue)
             }
             
             if gridDashedLine["spaceLength"].number != nil {
-                spaceLength = CGFloat(gridDashedLine["spaceLength"].numberValue)
+                spaceLength = CGFloat(truncating: gridDashedLine["spaceLength"].numberValue)
             }
             
             if gridDashedLine["phase"].number != nil {
-                axis.gridLineDashPhase = CGFloat(gridDashedLine["phase"].numberValue)
+                axis.gridLineDashPhase = CGFloat(truncating: gridDashedLine["phase"].numberValue)
             }
             
             axis.gridLineDashLengths = [lineLength, spaceLength]
@@ -270,12 +324,13 @@ open class RNChartViewBase: UIView, ChartViewDelegate {
         if config["limitLines"].array != nil {
             let limitLinesConfig = config["limitLines"].arrayValue
             
+            axis.removeAllLimitLines()
             for limitLineConfig in limitLinesConfig {
                 
                 if limitLineConfig["limit"].double != nil {
                     
                     let limitLine = ChartLimitLine(limit: limitLineConfig["limit"].doubleValue)
-                    
+                  
                     if limitLineConfig["label"].string != nil {
                         limitLine.label = limitLineConfig["label"].stringValue
                     }
@@ -283,11 +338,30 @@ open class RNChartViewBase: UIView, ChartViewDelegate {
                     if (limitLineConfig["lineColor"].int != nil) {
                         limitLine.lineColor = RCTConvert.uiColor(limitLineConfig["lineColor"].intValue)
                     }
-                    
-                    if limitLineConfig["lineWidth"].number != nil {
-                        limitLine.lineWidth = CGFloat(limitLineConfig["lineWidth"].numberValue)
+                  
+                    if (limitLineConfig["valueTextColor"].int != nil) {
+                        limitLine.valueTextColor = RCTConvert.uiColor(limitLineConfig["valueTextColor"].intValue)
+                    }
+                  
+                    if (limitLineConfig["valueFont"].int != nil) {
+                        limitLine.valueFont = NSUIFont.systemFont(ofSize: CGFloat(limitLineConfig["valueFont"].intValue))
                     }
                     
+                    if limitLineConfig["lineWidth"].number != nil {
+                        limitLine.lineWidth = CGFloat(truncating: limitLineConfig["lineWidth"].numberValue)
+                    }
+                  
+                    if limitLineConfig["labelPosition"].string != nil {
+                        limitLine.labelPosition = BridgeUtils.parseLimitlineLabelPosition(limitLineConfig["labelPosition"].stringValue);
+                    }
+                  
+                    if limitLineConfig["lineDashPhase"].float != nil {
+                        limitLine.lineDashPhase = CGFloat(limitLineConfig["lineDashPhase"].floatValue);
+                    }
+                    if limitLineConfig["lineDashLengths"].arrayObject != nil {
+                        limitLine.lineDashLengths = limitLineConfig["lineDashLengths"].arrayObject as? [CGFloat];
+                    }
+
                     axis.addLimitLine(limitLine)
                 }
             }
@@ -323,20 +397,26 @@ open class RNChartViewBase: UIView, ChartViewDelegate {
         
         // formatting
         // TODO: other formatting options
-        if config["valueFormatter"].array != nil {
-            axis.valueFormatter = IndexAxisValueFormatter(values: config["valueFormatter"].arrayValue.map({ $0.stringValue }))
-        } else if config["valueFormatter"].string != nil {
-            if "largeValue" == config["valueFormatter"].stringValue {
+        let valueFormatter = config["valueFormatter"];
+        if valueFormatter.array != nil {
+            axis.valueFormatter = IndexAxisValueFormatter(values: valueFormatter.arrayValue.map({ $0.stringValue }))
+        } else if valueFormatter.string != nil {
+            if "largeValue" == valueFormatter.stringValue {
                 axis.valueFormatter = LargeValueFormatter();
-            } else if "percent" == config["valueFormatter"].stringValue {
+            } else if "percent" == valueFormatter.stringValue {
                 let percentFormatter = NumberFormatter()
                 percentFormatter.numberStyle = .percent
                 
                 axis.valueFormatter = DefaultAxisValueFormatter(formatter: percentFormatter);
+            } else if "date" == valueFormatter.stringValue {
+              let valueFormatterPattern = config["valueFormatterPattern"].stringValue;
+              let since = config["since"].double != nil ? config["since"].doubleValue : 0
+              let timeUnit = config["timeUnit"].string != nil ? config["timeUnit"].stringValue : "MILLISECONDS"
+              axis.valueFormatter = CustomChartDateFormatter(pattern: valueFormatterPattern, since: since, timeUnit: timeUnit);
             } else {
               let customFormatter = NumberFormatter()
-              customFormatter.positiveFormat = config["valueFormatter"].stringValue
-              customFormatter.negativeFormat = config["valueFormatter"].stringValue
+              customFormatter.positiveFormat = valueFormatter.stringValue
+              customFormatter.negativeFormat = valueFormatter.stringValue
               
               axis.valueFormatter = DefaultAxisValueFormatter(formatter: customFormatter);
           }
@@ -374,7 +454,10 @@ open class RNChartViewBase: UIView, ChartViewDelegate {
         
     }
     
-        
+    func setHighlights(_ config: NSArray) {
+        chart.highlightValues(HighlightUtils.getHighlights(config))
+    }
+    
     @objc public func chartValueSelected(_ chartView: ChartViewBase, entry: ChartDataEntry, highlight: Highlight) {
         
         if self.onSelect == nil {
@@ -395,10 +478,79 @@ open class RNChartViewBase: UIView, ChartViewDelegate {
     }
     
     @objc public func chartScaled(_ chartView: ChartViewBase, scaleX: CoreGraphics.CGFloat, scaleY: CoreGraphics.CGFloat) {
+        sendEvent("chartScaled")
     }
     
     @objc public func chartTranslated(_ chartView: ChartViewBase, dX: CoreGraphics.CGFloat, dY: CoreGraphics.CGFloat) {
+        sendEvent("chartTranslated")
     }
     
+    func sendEvent(_ action:String) {
+        var dict = [AnyHashable: Any]()
+        
+        dict["action"] = action
+        if chart is BarLineChartViewBase {
+            let viewPortHandler = chart.viewPortHandler
+            let barLineChart = chart as! BarLineChartViewBase
+            
+            dict["scaleX"] = barLineChart.scaleX
+            dict["scaleY"] = barLineChart.scaleY
+            
+            if let handler = viewPortHandler {
+                let center = barLineChart.valueForTouchPoint(point: handler.contentCenter, axis: YAxis.AxisDependency.left)
+                dict["centerX"] = center.x
+                dict["centerY"] = center.y
+                
+                let leftBottom = barLineChart.valueForTouchPoint(point: CGPoint(x: handler.contentLeft, y: handler.contentBottom), axis: YAxis.AxisDependency.left)
+                
+                let rightTop = barLineChart.valueForTouchPoint(point: CGPoint(x: handler.contentRight, y: handler.contentTop), axis: YAxis.AxisDependency.left)
+                
+                dict["left"] = leftBottom.x
+                dict["bottom"] = leftBottom.y
+                dict["right"] = rightTop.x
+                dict["top"] = rightTop.y
+                
+                if self.group != nil && self.identifier != nil {
+                    ChartGroupHolder.sync(group: self.group!, identifier: self.identifier!, scaleX: barLineChart.scaleX, scaleY: barLineChart.scaleY, centerX: center.x, centerY: center.y, performImmediately: true)
+                }
+            }
+        }
+        
+        if self.onChange == nil {
+            return
+        } else {
+            self.onChange!(dict)
+        }
+    }
+    
+    func setGroup(_ group: String) {
+        self.group = group
+    }
+    
+    func setIdentifier(_ identifier: String) {
+        self.identifier = identifier
+    }
+    
+    func setSyncX(_ syncX: Bool) {
+        self.syncX = syncX
+    }
+    
+    func setSyncY(_ syncY: Bool) {
+        self.syncY = syncY
+    }
+
+    func onAfterDataSetChanged() {
+    }
+    
+    override open func didSetProps(_ changedProps: [String]!) {
+        super.didSetProps(changedProps)        
+        chart.notifyDataSetChanged()
+        onAfterDataSetChanged()
+        
+        if self.group != nil && self.identifier != nil && chart is BarLineChartViewBase {
+            ChartGroupHolder.addChart(group: self.group!, identifier: self.identifier!, chart: chart as! BarLineChartViewBase, syncX: syncX, syncY: syncY);
+        }
+        
+    }
     
 }

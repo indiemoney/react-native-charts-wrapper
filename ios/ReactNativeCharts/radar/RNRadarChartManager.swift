@@ -5,10 +5,15 @@
 import UIKit
 
 @objc(RNRadarChartManager)
+@objcMembers
 open class RNRadarChartManager: RCTViewManager {
   override open func view() -> UIView! {
     let ins = RNRadarChartView()
     return ins;
   }
-  
+
+  override open static func requiresMainQueueSetup() -> Bool {
+    return true;
+  }
+
 }

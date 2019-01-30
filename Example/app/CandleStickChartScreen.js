@@ -3,6 +3,7 @@ import {
   AppRegistry,
   StyleSheet,
   Text,
+  Button,
   View,
   processColor
 } from 'react-native';
@@ -21,7 +22,6 @@ class CandleStickChartScreen extends React.Component {
         enabled: true,
         textSize: 14,
         form: 'CIRCLE',
-        position: 'BELOW_CHART_RIGHT',
         wordWrapEnabled: true
       },
       data: {
@@ -84,7 +84,7 @@ class CandleStickChartScreen extends React.Component {
             shadowWidth: 1,
             shadowColorSameAsCandle: true,
             increasingColor: processColor('#71BD6A'),
-            increasingPaintStyle: 'fill',
+            increasingPaintStyle: 'FILL',
             decreasingColor: processColor('#D14B5A')
           },
           xAxis: {},
@@ -95,8 +95,11 @@ class CandleStickChartScreen extends React.Component {
         enabled: true,
         markerColor: processColor('#2c3e50'),
         textColor: processColor('white'),
-      }
+      },
+      zoomXValue : 0
     };
+
+    this.x = 0;
   }
 
   componentDidMount() {
@@ -104,9 +107,10 @@ class CandleStickChartScreen extends React.Component {
       update(this.state, {
           xAxis: {
             $set: {
-              drawLabels: false,
-              drawGridLines: false,
+              drawLabels: true,
+              drawGridLines: true,
               position: 'BOTTOM',
+              yOffset: 5,
 
               limitLines: _.times(this.state.data.dataSets[0].values.length / 5, (i) => {
                 return {
@@ -124,16 +128,24 @@ class CandleStickChartScreen extends React.Component {
                 valueFormatter: '$ #',
                 limitLines: [{
                   limit: 112.4,
-                  lineColor: processColor('red')
+                  lineColor: processColor('red'),
+                  lineDashPhase: 2,
+                  lineDashLengths: [10,20]
                 }, {
                   limit: 89.47,
-                  lineColor: processColor('red')
+                  lineColor: processColor('red'),
+                  lineDashPhase: 2,
+                  lineDashLengths: [10,20]
                 }]
               },
               right: {
                 enabled: false
-              }
+              },
+
             }
+          },
+          zoomXValue: {
+            $set: 99999
           }
         }
       ));
@@ -146,6 +158,8 @@ class CandleStickChartScreen extends React.Component {
     } else {
       this.setState({...this.state, selectedEntry: JSON.stringify(entry)})
     }
+
+    console.log(event.nativeEvent)
   }
 
   render() {
@@ -163,14 +177,17 @@ class CandleStickChartScreen extends React.Component {
             style={styles.chart}
             data={this.state.data}
             marker={this.state.marker}
-            description={{text: ''}}
+            chartDescription={{text: 'CandleStick'}}
             legend={this.state.legend}
             xAxis={this.state.xAxis}
             yAxis={this.state.yAxis}
             maxVisibleValueCount={16}
             autoScaleMinMaxEnabled={true}
-            zoom={{scaleX: 2, scaleY: 1, xValue:  400000, yValue: 1}}
+            // zoom={{scaleX: 2, scaleY: 1, xValue:  400000, yValue: 1}}
+            zoom={{scaleX: 15.41, scaleY: 1, xValue:  40, yValue: 916, axisDependency: 'LEFT'}}
             onSelect={this.handleSelect.bind(this)}
+            ref="chart"
+            onChange={(event) => console.log(event.nativeEvent)}
           />
         </View>
 

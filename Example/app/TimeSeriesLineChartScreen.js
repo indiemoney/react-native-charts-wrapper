@@ -22,7 +22,6 @@ class TimeSeriesLineChartScreen extends React.Component {
         enabled: true,
         textColor: processColor('red'),
         textSize: 12,
-        position: 'BELOW_CHART_RIGHT',
         form: 'SQUARE',
         formSize: 14,
         xEntrySpace: 10,
@@ -42,7 +41,8 @@ class TimeSeriesLineChartScreen extends React.Component {
         markerFontSize: 14,
       },
 
-      selectedEntry: ""
+      selectedEntry: "",
+      yAxis: {left:{axisMaximum:12000}, right: {enabled: false}}
     }
 
   }
@@ -76,7 +76,7 @@ class TimeSeriesLineChartScreen extends React.Component {
               values: [
                 {x: 1, y: 11000, marker: "a very long long long long long long long long \nmarker at top left"},
                 {x: 20, y: 90, marker: "eat eat eat, never\n stop eat"},
-                {x: 40, y: -130},
+                {x: 40, y: -130, marker:""  },
                 {x: 65, y: 11000, marker: "test top center marker"},
                 {x: 70, y: -2000, marker: "eat more"},
                 {x: 90, y: 9000, marker: "your are overweight, eat less"},
@@ -117,6 +117,8 @@ class TimeSeriesLineChartScreen extends React.Component {
     } else {
       this.setState({...this.state, selectedEntry: JSON.stringify(entry)})
     }
+
+    console.log(event.nativeEvent)
   }
 
   render() {
@@ -146,24 +148,13 @@ class TimeSeriesLineChartScreen extends React.Component {
             borderWidth={1}
             drawBorders={true}
 
-            touchEnabled={true}
-            dragEnabled={true}
-            scaleEnabled={true}
-            scaleXEnabled={true}
-            scaleYEnabled={true}
-            pinchZoom={true}
-            doubleTapToZoomEnabled={false}
+            yAxis={this.state.yAxis}
 
-            dragDecelerationEnabled={true}
-            dragDecelerationFrictionCoef={0.99}
-            yAxis={{left:{axisMaximum:12000}}}
-
-            keepPositionOnRotation={false}
-
-            xAxis={{position:'BOTTOM'}}
-
+            
             onSelect={this.handleSelect.bind(this)}
+            onChange={(event) => console.log(event.nativeEvent)}
 
+            ref="chart"
           />
         </View>
       </View>

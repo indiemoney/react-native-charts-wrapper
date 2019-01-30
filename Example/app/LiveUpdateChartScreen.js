@@ -20,8 +20,15 @@ export default class LiveUpdating extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      values: [],
-      colorIndex: 0
+      values: [0],
+      colorIndex: 0,
+      marker: {
+        enabled: true,
+        digits: 2,
+        backgroundTint: processColor('teal'),
+        markerColor: processColor('#F0C0FF8C'),
+        textColor: processColor('white'),
+      }
     }
   }
 
@@ -53,8 +60,12 @@ export default class LiveUpdating extends Component {
 
   componentDidMount() {
     this.interval = setInterval(() => {
-      if (this.state.values.length >= 20) {
-        this.setState({values: [], colorIndex: 0});
+      if (this.state.values.length >= 10) {
+        // https://github.com/PhilJay/MPAndroidChart/issues/2450
+        // MpAndroidChart 3.0.2 will crash when data entry list is empty.
+
+        this.refs.chart.highlights([])
+        this.setState({values: [0], colorIndex: 0});
       } else {
         this.setState({
           values: this.state.values.concat([Math.floor((Math.random() * 100) + 1)]),
@@ -72,7 +83,7 @@ export default class LiveUpdating extends Component {
     const {values, colorIndex} = this.state;
     const config = this.next(values, colorIndex);
     return (
-      <LineChart data={config.data} xAxis={config.xAxis} style={styles.container}/>
+      <LineChart data={config.data} xAxis={config.xAxis} style={styles.container} marker={this.state.marker} ref="chart"/>
     );
   }
 }

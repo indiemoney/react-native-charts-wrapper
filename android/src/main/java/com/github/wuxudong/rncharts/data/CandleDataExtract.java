@@ -5,6 +5,7 @@ import android.graphics.Paint;
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.ReadableType;
+import com.github.mikephil.charting.charts.Chart;
 import com.github.mikephil.charting.data.CandleData;
 import com.github.mikephil.charting.data.CandleDataSet;
 import com.github.mikephil.charting.data.CandleEntry;
@@ -14,11 +15,11 @@ import com.github.wuxudong.rncharts.utils.ChartDataSetConfigUtils;
 import com.github.wuxudong.rncharts.utils.ConversionUtil;
 
 import java.util.ArrayList;
+import java.util.Locale;
 
 /**
  * Created by xudong on 02/03/2017.
  */
-
 public class CandleDataExtract extends DataExtract<CandleData, CandleEntry> {
     @Override
     CandleData createData() {
@@ -31,10 +32,10 @@ public class CandleDataExtract extends DataExtract<CandleData, CandleEntry> {
     }
 
     @Override
-    void dataSetConfig(IDataSet<CandleEntry> dataSet, ReadableMap config) {
+    void dataSetConfig(Chart chart, IDataSet<CandleEntry> dataSet, ReadableMap config) {
         CandleDataSet candleDataSet = (CandleDataSet) dataSet;
 
-        ChartDataSetConfigUtils.commonConfig(candleDataSet, config);
+        ChartDataSetConfigUtils.commonConfig(chart, candleDataSet, config);
         ChartDataSetConfigUtils.commonBarLineScatterCandleBubbleConfig(candleDataSet, config);
         ChartDataSetConfigUtils.commonLineScatterCandleRadarConfig(candleDataSet, config);
 
@@ -58,13 +59,13 @@ public class CandleDataExtract extends DataExtract<CandleData, CandleEntry> {
             candleDataSet.setDecreasingColor(config.getInt("decreasingColor"));
         }
         if (BridgeUtils.validate(config, ReadableType.String, "decreasingPaintStyle")) {
-            candleDataSet.setDecreasingPaintStyle(Paint.Style.valueOf(config.getString("decreasingPaintStyle").toUpperCase()));
+            candleDataSet.setDecreasingPaintStyle(Paint.Style.valueOf(config.getString("decreasingPaintStyle").toUpperCase(Locale.ENGLISH)));
         }
         if (BridgeUtils.validate(config, ReadableType.Number, "increasingColor")) {
             candleDataSet.setIncreasingColor(config.getInt("increasingColor"));
         }
         if (BridgeUtils.validate(config, ReadableType.String, "increasingPaintStyle")) {
-            candleDataSet.setIncreasingPaintStyle(Paint.Style.valueOf(config.getString("increasingPaintStyle").toUpperCase()));
+            candleDataSet.setIncreasingPaintStyle(Paint.Style.valueOf(config.getString("increasingPaintStyle").toUpperCase(Locale.ENGLISH)));
         }
     }
 
